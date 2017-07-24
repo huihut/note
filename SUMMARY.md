@@ -1,5 +1,6 @@
 # Summary
 
 * [Introduction](README.md)
-* [C++ Note](c++-note.md)
+* [C++](c++-note.md)
+* [Git](git.md)
 
