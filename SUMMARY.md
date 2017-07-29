@@ -7,4 +7,5 @@
 * [Linux](Linux.md)
 * [Parallel](Parallel.md)
 * [C\#](c.md)
+* [Python\_Error](pythonerror.md)
 
