@@ -110,5 +110,255 @@ class Program
 
 C\#中的委托相当于C++中的类型安全的、面向对象的函数指针。
 
+```
+using System;
+using System.IO;
+
+namespace HelloCSharp
+{
+    // boiler 类
+    class Boiler
+    {
+        private int temp;
+        private int pressure;
+        public Boiler(int t, int p)
+        {
+            temp = t;
+            pressure = p;
+        }
+        public int getTemp()
+        {
+            return temp;
+        }
+        public int getPressure()
+        {
+            return pressure;
+        }
+    }
+
+    // 事件发布器
+    class DelegateBoilerEvent
+    {
+        public delegate void BoilerLogHandler(String status);
+
+        // 基于上面的委托定义事件
+        public event BoilerLogHandler BoilerEventLog;
+
+        public void LogProcess()
+        {
+            string remarks = "O. K";
+            Boiler b = new Boiler(100, 12);
+            int t = b.getTemp();
+            int p = b.getPressure();
+            if(t > 150 || t < 80 || p < 12 || p > 15) 
+            {
+                remarks = "Need Maintenance";
+            }
+            OnBoilerEventLog("Logging Info:\n");
+            OnBoilerEventLog("Temparature " + t + "\nPressure: " + p);
+            OnBoilerEventLog("\nMessage: " + remarks);
+        }
+        protected void OnBoilerEventLog(string message)
+        {
+            if (BoilerEventLog != null)
+            {
+                BoilerEventLog(message);
+            }
+        }
+    }
+
+    // 该类保留写入日志文件的条款
+    class BoilerInfoLogger
+    {
+        FileStream fs;
+        StreamWriter sw;
+        public BoilerInfoLogger(string filename)
+        {
+            fs = new FileStream(filename, FileMode.Append, FileAccess.Write);
+            sw = new StreamWriter(fs);
+        }
+        public void Logger(string info)
+        {
+            sw.WriteLine(info);
+        }
+        public void Close()
+        {
+            sw.Close();
+            fs.Close();
+        }
+    }
+
+    // 事件订阅器
+    public class RecordBoilerInfo
+    {
+        static void Logger(string info)
+        {
+            Console.WriteLine(info);
+        }//end of Logger
+
+        static void Main(string[] args)
+        {
+            BoilerInfoLogger filelog = new BoilerInfoLogger("e:\\boiler.txt");
+            DelegateBoilerEvent boilerEvent = new DelegateBoilerEvent();
+            boilerEvent.BoilerEventLog += new DelegateBoilerEvent.BoilerLogHandler(Logger);
+            boilerEvent.BoilerEventLog += new DelegateBoilerEvent.BoilerLogHandler(filelog.Logger);
+            boilerEvent.LogProcess();
+            Console.ReadLine();
+            filelog.Close();
+        }//end of main
+
+    }//end of RecordBoilerInfo
+}
+```
+
+## 接口
+
+接口是指定一组函数成员，而不实现他们的引用类型。所以只能类和结构来实现接口 。
+
+```
+using System;
+
+namespace HelloCSharp
+{
+	interface IInfo
+	{
+		string GetName();
+		string GetAge();
+	}
+
+	class CA : IInfo
+	{
+		public string Name;
+		public int Age;
+		public string GetName() { return Name; }
+		public string GetAge() { return Age.ToString(); }
+
+	}
+
+	class CB : IInfo
+	{
+		public string First;
+		public string Last;
+		public double PersonsAge;
+		public string GetName() { return First + " " + Last; }
+		public string GetAge() { return PersonsAge.ToString();}
+	}
+
+	class Program
+	{
+		static void PrintInfo(IInfo item)
+		{
+			Console.WriteLine("Name : {0}, Age : {1}", item.GetName(), item.GetAge());
+		}
+
+		static void Main()
+		{
+			CA a = new CA() { Name = "John Doe", Age = 35 };
+			CB b = new CB() { First = "Jane", Last = "Doe", PersonsAge = 33 };
+
+			PrintInfo(a);
+			PrintInfo(b);
+		}
+	}
+
+}
+
+```
+
+
+
+## 转换
+
+转换是接受一个类型的值并使用它作为另一个类型的等价值得过程。
+
+
+
+## 泛型
+
+泛型特性提供了一种更优雅地方式，可以让多个类型共享一组代码。泛型允许我们声明类型参数化的代码，可以用不同的类型进行实例化。
+
+泛型是类型的模板，类型是对象的模板。
+
+C\#有五种泛型：类、结构、接口、委托、方法。
+
+```
+using System;
+
+namespace HelloCSharp
+{
+	class MyStack<T>
+	{
+		T[] StackArray;
+		int StackPointer = 0;
+
+		public void Push(T x)
+		{
+			if (!IsStackFull)
+			{
+				StackArray[StackPointer++] = x;
+			}
+		}
+
+		public T Pop()
+		{
+			return (!IsStackEmpty) ? StackArray[--StackPointer] : StackArray[0];
+		}
+
+		const int MaxStack = 10;
+		bool IsStackFull { get { return StackPointer >= MaxStack;} }
+		bool IsStackEmpty { get { return StackPointer <= 0;} }
+
+		public MyStack()
+		{
+			StackArray = new T[MaxStack];
+		}
+
+		public void Print()
+		{
+			for (int i = StackPointer - 1; i >= 0; i--)
+			{
+				Console.WriteLine(" Value:{0}", StackArray[i]);
+			}
+		}
+	}
+
+	class Program
+	{
+		static void Main()
+		{
+			MyStack<int> StackInt = new MyStack<int>();
+			MyStack<string> StackString = new MyStack<string>();
+
+			StackInt.Push(3);
+			StackInt.Push(5);
+			StackInt.Push(7);
+			StackInt.Push(9);
+			StackInt.Print();
+
+			StackString.Push("This is fun");
+			StackString.Push("Hi there! ");
+			StackString.Print();
+		}
+	}
+}
+
+```
+
+### where
+
+使用**where**语句**约束泛型**参数可以接受哪些类型
+
+### 可变性（协变、逆变、不变）
+
+协变：如果派生类只是用于输出值，那么这种结构化的委托有效性之间的常数关系叫做协变。关键字out。
+
+逆变：在期望传入基类时，允许传入派生类对象的特性叫做逆变。
+
+```
+delegate T Factory<out R, in S, T>();
+```
+
+
+
 
 
