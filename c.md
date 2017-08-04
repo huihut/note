@@ -220,58 +220,53 @@ using System;
 
 namespace HelloCSharp
 {
-	interface IInfo
-	{
-		string GetName();
-		string GetAge();
-	}
+    interface IInfo
+    {
+        string GetName();
+        string GetAge();
+    }
 
-	class CA : IInfo
-	{
-		public string Name;
-		public int Age;
-		public string GetName() { return Name; }
-		public string GetAge() { return Age.ToString(); }
+    class CA : IInfo
+    {
+        public string Name;
+        public int Age;
+        public string GetName() { return Name; }
+        public string GetAge() { return Age.ToString(); }
 
-	}
+    }
 
-	class CB : IInfo
-	{
-		public string First;
-		public string Last;
-		public double PersonsAge;
-		public string GetName() { return First + " " + Last; }
-		public string GetAge() { return PersonsAge.ToString();}
-	}
+    class CB : IInfo
+    {
+        public string First;
+        public string Last;
+        public double PersonsAge;
+        public string GetName() { return First + " " + Last; }
+        public string GetAge() { return PersonsAge.ToString();}
+    }
 
-	class Program
-	{
-		static void PrintInfo(IInfo item)
-		{
-			Console.WriteLine("Name : {0}, Age : {1}", item.GetName(), item.GetAge());
-		}
+    class Program
+    {
+        static void PrintInfo(IInfo item)
+        {
+            Console.WriteLine("Name : {0}, Age : {1}", item.GetName(), item.GetAge());
+        }
 
-		static void Main()
-		{
-			CA a = new CA() { Name = "John Doe", Age = 35 };
-			CB b = new CB() { First = "Jane", Last = "Doe", PersonsAge = 33 };
+        static void Main()
+        {
+            CA a = new CA() { Name = "John Doe", Age = 35 };
+            CB b = new CB() { First = "Jane", Last = "Doe", PersonsAge = 33 };
 
-			PrintInfo(a);
-			PrintInfo(b);
-		}
-	}
+            PrintInfo(a);
+            PrintInfo(b);
+        }
+    }
 
 }
-
 ```
-
-
 
 ## 转换
 
 转换是接受一个类型的值并使用它作为另一个类型的等价值得过程。
-
-
 
 ## 泛型
 
@@ -286,62 +281,61 @@ using System;
 
 namespace HelloCSharp
 {
-	class MyStack<T>
-	{
-		T[] StackArray;
-		int StackPointer = 0;
+    class MyStack<T>
+    {
+        T[] StackArray;
+        int StackPointer = 0;
 
-		public void Push(T x)
-		{
-			if (!IsStackFull)
-			{
-				StackArray[StackPointer++] = x;
-			}
-		}
+        public void Push(T x)
+        {
+            if (!IsStackFull)
+            {
+                StackArray[StackPointer++] = x;
+            }
+        }
 
-		public T Pop()
-		{
-			return (!IsStackEmpty) ? StackArray[--StackPointer] : StackArray[0];
-		}
+        public T Pop()
+        {
+            return (!IsStackEmpty) ? StackArray[--StackPointer] : StackArray[0];
+        }
 
-		const int MaxStack = 10;
-		bool IsStackFull { get { return StackPointer >= MaxStack;} }
-		bool IsStackEmpty { get { return StackPointer <= 0;} }
+        const int MaxStack = 10;
+        bool IsStackFull { get { return StackPointer >= MaxStack;} }
+        bool IsStackEmpty { get { return StackPointer <= 0;} }
 
-		public MyStack()
-		{
-			StackArray = new T[MaxStack];
-		}
+        public MyStack()
+        {
+            StackArray = new T[MaxStack];
+        }
 
-		public void Print()
-		{
-			for (int i = StackPointer - 1; i >= 0; i--)
-			{
-				Console.WriteLine(" Value:{0}", StackArray[i]);
-			}
-		}
-	}
+        public void Print()
+        {
+            for (int i = StackPointer - 1; i >= 0; i--)
+            {
+                Console.WriteLine(" Value:{0}", StackArray[i]);
+            }
+        }
+    }
 
-	class Program
-	{
-		static void Main()
-		{
-			MyStack<int> StackInt = new MyStack<int>();
-			MyStack<string> StackString = new MyStack<string>();
+    class Program
+    {
+        static void Main()
+        {
+            MyStack<int> StackInt = new MyStack<int>();
+            MyStack<string> StackString = new MyStack<string>();
 
-			StackInt.Push(3);
-			StackInt.Push(5);
-			StackInt.Push(7);
-			StackInt.Push(9);
-			StackInt.Print();
+            StackInt.Push(3);
+            StackInt.Push(5);
+            StackInt.Push(7);
+            StackInt.Push(9);
+            StackInt.Print();
 
-			StackString.Push("This is fun");
-			StackString.Push("Hi there! ");
-			StackString.Print();
-		}
-	}
+            StackString.Push("This is fun");
+            StackString.Push("Hi there! ");
+            StackString.Print();
+        }
+    }
 }
-
 ```
 
 ### where
@@ -357,6 +351,17 @@ namespace HelloCSharp
 ```
 delegate T Factory<out R, in S, T>();
 ```
+
+## 枚举器和迭代器
+
+枚举器可以依次返回请求的数组中的元素
+
+### IEnumerator接口
+
+* GetEnumerator\(\)：获取枚举器
+* Current：返回当前位置的项
+* MoveNext\(\)：前进位置到下一项
+* Reset\(\)：把位置设置回原始配置
 
 
 
