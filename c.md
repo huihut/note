@@ -688,17 +688,18 @@ class Program
 {
     static void Main()
     {
-        XDocument employees1 = new XDocument(
-            new XElement("Employees",
-                new XElement("Name", "Bob Smith"),
-                new XElement("Name", "Bob Smith")
-            )
-        );
+        XDocument employees1 = 
+            new XDocument(                                // 创建XML文档
+                new XElement("Employees",                 // 创建根元素    
+                    new XElement("Name", "Bob Smith"),    // 创建元素
+                    new XElement("Name", "Bob Smith")     // 创建元素
+                )
+            );
 
-        // 
+        // 保存到文件
         employees1.Save("EmployeesFile.xml");
 
-        //
+        // 将保存的文档加载到新变量中    
         XDocument employees2 = new XDocument.Load("EmployeesFile.xml");
 
         //
