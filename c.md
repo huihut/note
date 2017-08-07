@@ -454,7 +454,7 @@ class MyClass
     {
         return IteratorMethod();
     }
-    
+
     public IEnumerator<string> IteratorMethod()
     {
         ...
@@ -466,7 +466,7 @@ class MyClass
 Main
 {
     MyClass mc = new MyClass();
-    
+
     foreach(string x in mc)
         ...
 }
@@ -481,7 +481,7 @@ class MyClass
     {
         return IteratorMethod().GetEnumerator();
     }
-    
+
     public IEnumerable<string> IteratorMethod()
     {
         ...
@@ -493,10 +493,10 @@ class MyClass
 Main
 {
     MyClass mc = new MyClass();
-    
+
     foreach(string x in mc)
         ...
-    
+
     foreach(string x in mc.IteratorMethod())
         ...   
 }
@@ -549,9 +549,9 @@ class Program
     static Void Main()
     {
         string Major = "History";
-    
+
         var student = new {Age = 19, Other.Name, Major};
-        
+
         Console.WriteLine("{0}, Age {1}, Major: {2}", student.Name, student,Age, student.Major);
     }    
 }
@@ -598,46 +598,46 @@ var query = from student in students
 ```
 class Program
 {
-	public class Student
-	{
-		public int StID;
-		public string LastName;
-	}
+    public class Student
+    {
+        public int StID;
+        public string LastName;
+    }
 
-	public class CourseStudent
-	{
-		public string CourseName;
-		public int StID;
-	}
+    public class CourseStudent
+    {
+        public string CourseName;
+        public int StID;
+    }
 
-	static Student[] students = new Student[]
-	{
-		new Student{StID = 1; LastName = "Carson"},
-		new Student{StID = 2; LastName = "Klassen"},
-		new Student{StID = 3; LastName = "Fleming"},
-	};
+    static Student[] students = new Student[]
+    {
+        new Student{StID = 1; LastName = "Carson"},
+        new Student{StID = 2; LastName = "Klassen"},
+        new Student{StID = 3; LastName = "Fleming"},
+    };
 
-	static CourseStudent[] studentInCourses = new CourseStudent[]
-	{
-		new CourseStudent{CourseName = "Art", StID = 1},
-		new CourseStudent{CourseName = "Art", StID = 2},
-		new CourseStudent{CourseName = "History", StID = 1},
-		new CourseStudent{CourseName = "History", StID = 3},
-		new CourseStudent{CourseName = "Physics", StID = 3},
-	};
+    static CourseStudent[] studentInCourses = new CourseStudent[]
+    {
+        new CourseStudent{CourseName = "Art", StID = 1},
+        new CourseStudent{CourseName = "Art", StID = 2},
+        new CourseStudent{CourseName = "History", StID = 1},
+        new CourseStudent{CourseName = "History", StID = 3},
+        new CourseStudent{CourseName = "Physics", StID = 3},
+    };
 
-	static void Main()
-	{
-		// 查询所有选择了历史课的学生的姓氏
-		var query = from s in students
-			    join c in studentsInCourses on s.StID equals c.StID
-		 	    where c.CourseName == "History"
-			    select s.LastName;
+    static void Main()
+    {
+        // 查询所有选择了历史课的学生的姓氏
+        var query = from s in students
+                join c in studentsInCourses on s.StID equals c.StID
+                 where c.CourseName == "History"
+                select s.LastName;
 
-		// 显示所有选择了历史课的学生的姓氏
-		foreach (var q in query)
-			Console.WriteLine("Student taking History: {0}", q);
-	}
+        // 显示所有选择了历史课的学生的姓氏
+        foreach (var q in query)
+            Console.WriteLine("Student taking History: {0}", q);
+    }
 }
 ```
 
@@ -650,7 +650,7 @@ var someInts = from a in groupA
                form b in groupB
                let sum = a + b
                where sum == 12
-               select new {a, b, sum};                
+               select new {a, b, sum};
 ```
 
 ### group子句
@@ -674,7 +674,7 @@ var someInts = from a in groupA
                select c;
 ```
 
-> [LINQ 标准查询操作概述 ](http://www.cnblogs.com/liqingwen/p/5801249.html)
+> [LINQ 标准查询操作概述 ](http://www.cnblogs.com/liqingwen/p/5801249.html)
 
 ### ![](http://images2015.cnblogs.com/blog/711762/201608/711762-20160825102717839-1252282113.png)LINQ to XML
 
@@ -682,28 +682,28 @@ var someInts = from a in groupA
 
 ```
 using System;
-using System.Xml.Linq;			// 需要的命名空间
+using System.Xml.Linq;            // 需要的命名空间
 
 class Program
 {
-	static void Main()
-	{
-		XDocument employees1 = new XDocument(
-			new XElement("Employees",
-				new XElement("Name", "Bob Smith"),
-				new XElement("Name", "Bob Smith")
-			)
-		);
+    static void Main()
+    {
+        XDocument employees1 = new XDocument(
+            new XElement("Employees",
+                new XElement("Name", "Bob Smith"),
+                new XElement("Name", "Bob Smith")
+            )
+        );
 
-		// 
-		employees1.Save("EmployeesFile.xml");
+        // 
+        employees1.Save("EmployeesFile.xml");
 
-		//
-		XDocument employees2 = new XDocument.Load("EmployeesFile.xml");
+        //
+        XDocument employees2 = new XDocument.Load("EmployeesFile.xml");
 
-		//
-		Console.WriteLine(employees2);
-	}
+        //
+        Console.WriteLine(employees2);
+    }
 }
 ```
 
