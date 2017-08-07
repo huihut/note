@@ -702,7 +702,7 @@ class Program
         // 将保存的文档加载到新变量中    
         XDocument employees2 = new XDocument.Load("EmployeesFile.xml");
 
-        //
+        // 显示文档
         Console.WriteLine(employees2);
     }
 }
