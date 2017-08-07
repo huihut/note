@@ -714,10 +714,9 @@ class Program
 XDocument xd = XDocument.Load("SimpleSample.xml");    // 加载文档
 XElement rt = xd.Element("MyElements");               // 获取根元素
 
-var xyz = from e in rt.Element()				       // 选择名称包含 
-		  where e.Name.ToString().Length == 5	       // 5个字符的元素
-		  select e;
-
+var xyz = from e in rt.Element()                       // 选择名称包含 
+          where e.Name.ToString().Length == 5           // 5个字符的元素
+          select e;
 ```
 
 ## 异步编程
@@ -727,25 +726,28 @@ var xyz = from e in rt.Element()				       // 选择名称包含
 ```
 class Program
 {
-	static void Main()
-	{
-		...
-		Task<int> value = DoAsyncStuff.CalculateSumAsync(5, 6);
-		...
-	}
+    static void Main()
+    {
+        ...
+        Task<int> value = DoAsyncStuff.CalculateSumAsync(5, 6);
+        ...
+    }
 }
 
 static class DoAsyncStuff
 {
-	public static async Task<int> CalculateSumAsync(int i1, int i2)
-	{
-		int sum = await TaskEx.Run( () => GetSum(i1, i2) );
-		return sum;
-	}
-	
-	private static int GetSum(int i1, int i2)
-	{
-		return i1 + i2;
-	}
+    public static async Task<int> CalculateSumAsync(int i1, int i2)
+    {
+        int sum = await TaskEx.Run( () => GetSum(i1, i2) );
+        return sum;
+    }
+
+    private static int GetSum(int i1, int i2)
+    {
+        return i1 + i2;
+    }
 }
 ```
+
+
+
