@@ -354,16 +354,18 @@ delegate T Factory<out R, in S, T>();
 
 ## 枚举器和迭代器
 
+### 枚举器
+
 枚举器可以依次返回请求的数组中的元素
 
-### IEnumerator接口
+#### IEnumerator接口
 
 * GetEnumerator\(\)：获取枚举器
 * Current：返回当前位置的项
 * MoveNext\(\)：前进位置到下一项
 * Reset\(\)：把位置设置回原始配置
 
-#### 使用IEnumerable和IEnumerator的示例
+#### 使用IEnumerable和IEnumerator的示例（非泛型）
 
 ```
 using System;
@@ -371,68 +373,336 @@ using System.Collections;
 
 namespace HelloCSharp
 {
-	class ColorEnumerator : IEnumerator
+    class ColorEnumerator : IEnumerator
+    {
+        string[] _colors;
+        int _position = -1;
+
+        public ColorEnumerator(string[] theColors)
+        {
+            _colors = new string[theColors.Length];
+            for (int i = 0; i < theColors.Length; i++)
+            {
+                _colors[i] = theColors[i];
+            }
+        }
+
+        public object Current
+        {
+            get
+            {
+                if (_position == -1 || _position >= _colors.Length)
+                    throw new InvalidOperationException();
+
+                return _colors[_position];
+            }
+        }
+
+        public bool MoveNext()
+        {
+            if (_position < _colors.Length - 1)
+            {
+                _position++;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Reset()
+        {
+            _position = -1;
+        }
+    }
+
+    class Spectrum : IEnumerable
+    {
+        string[] Colors = { "violet", "blue", "cyan", "green", "yellow", "orange", "red" };
+
+        public IEnumerator GetEnumerator()
+        {
+            return new ColorEnumerator(Colors);
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Spectrum spectrum = new Spectrum();
+            foreach (string color in spectrum)
+                Console.WriteLine(color);
+        }
+    }
+}
+```
+
+### 迭代器
+
+可以通过创建迭代器来返回**可枚举类型\(**IEnumerable\)或枚举器\(IEnumerator\)
+
+需要`using System.Collections.Generic`
+
+#### 枚举器的迭代器模式
+
+```
+class MyClass
+{
+    public IEnumerator<string> GetEnumerator()
+    {
+        return IteratorMethod();
+    }
+    
+    public IEnumerator<string> IteratorMethod()
+    {
+        ...
+        yield return ...;
+        yield return ...;
+    }
+}
+
+Main
+{
+    MyClass mc = new MyClass();
+    
+    foreach(string x in mc)
+        ...
+}
+```
+
+#### 可枚举类型的迭代器模式
+
+```
+class MyClass
+{
+    public IEnumerator<string> GetEnumerator()
+    {
+        return IteratorMethod().GetEnumerator();
+    }
+    
+    public IEnumerable<string> IteratorMethod()
+    {
+        ...
+        yield return ...;
+        yield return ...;
+    }
+}
+
+Main
+{
+    MyClass mc = new MyClass();
+    
+    foreach(string x in mc)
+        ...
+    
+    foreach(string x in mc.IteratorMethod())
+        ...   
+}
+```
+
+> [使用迭代器（C\# 编程指南）](https://msdn.microsoft.com/zh-cn/library/65zzykke%28v=vs.100%29.aspx)
+
+## LINQ
+
+LINQ（发音为link）代表语言集成查询（Language Integrated Query），是.NET 框架的扩展，允许我们使用SQL查询数据库的方式来查询数据集合（数据库、程序对象的集合、XML文档）
+
+```
+class LINQQueryExpressions
+{
+    static void Main()
+    {
+
+        // Specify the data source.
+        int[] scores = new int[] { 97, 92, 81, 60 };
+
+        // Define the query expression.
+        IEnumerable<int> scoreQuery =
+            from score in scores
+            where score > 80
+            select score;
+
+        // Execute the query.
+        foreach (int i in scoreQuery)
+        {
+            Console.Write(i + " ");
+        }            
+    }
+}
+
+// Output: 97 92 81
+```
+
+### 扩展：匿名类型\(anonymous type\)
+
+匿名类型对象初始化可以有三种形式：赋值形式、简单标识符、成员访问表达式。后两种形式叫做**投影初始化语句（projection initializer）。**
+
+```
+class Other
+{
+    static public string Name = "Mary Jones";
+}
+
+class Program
+{
+    static Void Main()
+    {
+        string Major = "History";
+    
+        var student = new {Age = 19, Other.Name, Major};
+        
+        Console.WriteLine("{0}, Age {1}, Major: {2}", student.Name, student,Age, student.Major);
+    }    
+}
+
+// Output: Mary Jones, Age 19, Major: History
+```
+
+### from子句
+
+```
+int[] arr = {10, 11, 12};
+
+var query = from item in arr
+            where item < 11
+            select item;
+
+foreach(var item in query)
+    Console.Write("{0}", item);
+```
+
+### where子句
+
+where子句根据之后的运算来除去不符合指定条件的项
+
+### select...group子句
+
+* select 子句
+* group...by 子句
+
+指定数据源和要选择的对象
+
+### orderby子句
+
+```
+var query = from student in students
+            orderby student.Age (ascending(升序)/descending(降序))
+            select student;
+```
+
+### join\(联结\)子句
+
+两张表联结起来：LastName -&gt; StID -&gt; CourseName
+
+```
+class Program
+{
+	public class Student
 	{
-		string[] _colors;
-		int _position = -1;
-
-		public ColorEnumerator(string[] theColors)
-		{
-			_colors = new string[theColors.Length];
-			for (int i = 0; i < theColors.Length; i++)
-			{
-				_colors[i] = theColors[i];
-			}
-		}
-
-		public object Current
-		{
-			get
-			{
-				if (_position == -1 || _position >= _colors.Length)
-					throw new InvalidOperationException();
-
-				return _colors[_position];
-			}
-		}
-
-		public bool MoveNext()
-		{
-			if (_position < _colors.Length - 1)
-			{
-				_position++;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-
-		public void Reset()
-		{
-			_position = -1;
-		}
+		public int StID;
+		public string LastName;
 	}
 
-	class Spectrum : IEnumerable
+	public class CourseStudent
 	{
-		string[] Colors = { "violet", "blue", "cyan", "green", "yellow", "orange", "red" };
-
-		public IEnumerator GetEnumerator()
-		{
-			return new ColorEnumerator(Colors);
-		}
+		public string CourseName;
+		public int StID;
 	}
 
-	class Program
+	static Student[] students = new Student[]
 	{
-		static void Main()
-		{
-			Spectrum spectrum = new Spectrum();
-			foreach (string color in spectrum)
-				Console.WriteLine(color);
-		}
+		new Student{StID = 1; LastName = "Carson"},
+		new Student{StID = 2; LastName = "Klassen"},
+		new Student{StID = 3; LastName = "Fleming"},
+	};
+
+	static CourseStudent[] studentInCourses = new CourseStudent[]
+	{
+		new CourseStudent{CourseName = "Art", StID = 1},
+		new CourseStudent{CourseName = "Art", StID = 2},
+		new CourseStudent{CourseName = "History", StID = 1},
+		new CourseStudent{CourseName = "History", StID = 3},
+		new CourseStudent{CourseName = "Physics", StID = 3},
+	};
+
+	static void Main()
+	{
+		// 查询所有选择了历史课的学生的姓氏
+		var query = from s in students
+			    join c in studentsInCourses on s.StID equals c.StID
+		 	    where c.CourseName == "History"
+			    select s.LastName;
+
+		// 显示所有选择了历史课的学生的姓氏
+		foreach (var q in query)
+			Console.WriteLine("Student taking History: {0}", q);
+	}
+}
+```
+
+### let子句
+
+let子句接受一个表达式的运算并把它赋值给一个需要在其他运算中使用的标识符。
+
+```
+var someInts = from a in groupA
+               form b in groupB
+               let sum = a + b
+               where sum == 12
+               select new {a, b, sum};                
+```
+
+### group子句
+
+group子句ba2select的对象根据一些标准进行分组
+
+```
+var someInts = from student in students
+               group student by student.Majorl;
+```
+
+### into子句（查询延续）
+
+查询延续子句可以接受查询的一部分结果并赋予一个名字，从而可以在查询的另一部分中使用。
+
+```
+var someInts = from a in groupA
+               join b in groupB on a equals b
+               into groupAandB
+               from c in groupAandB
+               select c;
+```
+
+> [LINQ 标准查询操作概述 ](http://www.cnblogs.com/liqingwen/p/5801249.html)
+
+### ![](http://images2015.cnblogs.com/blog/711762/201608/711762-20160825102717839-1252282113.png)LINQ to XML
+
+#### XML
+
+```
+using System;
+using System.Xml.Linq;			// 需要的命名空间
+
+class Program
+{
+	static void Main()
+	{
+		XDocument employees1 = new XDocument(
+			new XElement("Employees",
+				new XElement("Name", "Bob Smith"),
+				new XElement("Name", "Bob Smith")
+			)
+		);
+
+		// 
+		employees1.Save("EmployeesFile.xml");
+
+		//
+		XDocument employees2 = new XDocument.Load("EmployeesFile.xml");
+
+		//
+		Console.WriteLine(employees2);
 	}
 }
 ```
