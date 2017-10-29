@@ -18,7 +18,7 @@ int main()
     const A a();        //常对象
     canst A *p = &a;    //常指针
     canst A &q = a;     //常引用
-}   
+}
 ```
 
 **说明**：
@@ -55,7 +55,7 @@ void fun(int a = 10, int b = 20, int c = 30);  //声明
 void fun(int a, int b, int c)
 {
     std::cout << a+b+c << std::endl;
-}   
+}
 ```
 
 函数实现时赋值，只覆盖前面的值
@@ -707,7 +707,7 @@ int main()
 * 纯虚函数 （含有纯虚函数的类叫做抽象类）
 
 ```
-virtual int A() = 0; 
+virtual int A() = 0;
 ```
 
 ## 运行时类型识别（RTTI）
@@ -770,6 +770,7 @@ class doSomething(Flyable *obj)     //【做些事情】
 * typeid 注意事项：
 
 * type\_id 返回一个 type\_info 对象的引用
+
 * 如果想通过基类的指针获得派生类的数据类型，基类必须带有虚函数
 * 只能获取对象的实际类型
 
