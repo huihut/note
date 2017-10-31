@@ -3,6 +3,7 @@
 ## 链接
 
 * [人脸检测发展：从VJ到深度学习（上）](https://www.leiphone.com/news/201608/MPXlWtGaJLPYL7NB.html)
+* [人脸检测发展：从VJ到深度学习（下）](https://www.leiphone.com/news/201608/IUpGIV33MWwH0x3Y.html)
 * [浅析人脸检测之Haar分类器方法](http://www.cnblogs.com/ello/archive/2012/04/28/2475419.html)
 
 ## Idea
