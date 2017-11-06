@@ -1,4 +1,4 @@
-# Qt程序打包发布方法（使用官方提供的windeployqt工具）
+# Qt程序打包发布方法（使用官方windeployqt工具）
 
 ## 添加windeployqt到环境变量
 
@@ -41,3 +41,18 @@
 ~~（打包，`windeployqt helloworld.exe --qmldir E:\Qt\Qt5.7.0\5.7\msvc2015_64\qml\QtQml`）~~
 
 完成
+
+## 链接
+
+[Qt官方开发环境生成的exe发布方式--使用windeployqt](http://tieba.baidu.com/p/3730103947?qq-pf-to=pcqq.group)
+
+[Qt 程序打包发布总结](http://blog.csdn.net/liuyez123/article/details/50462637)
+
+### 知乎
+
+[Qt 如何打包一个软件？](https://www.zhihu.com/question/21359230)
+
+### 官方
+
+[Deploying Qt Applications](http://doc.qt.io/qt-5/deployment.html)
+[Qt for Windows - Deployment](http://doc.qt.io/qt-5/windows-deployment.html)
