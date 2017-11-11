@@ -10,4 +10,5 @@
 * [Python\_Error](PythonError.md)
 * [Unity](unity.md)
 * [Face\_Detection](facedetection.md)
+* [QtPackage](QtPackage.md)
 
