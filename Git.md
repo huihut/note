@@ -233,9 +233,14 @@ Github 上传单个文件应该低于100M。上传文件超过50M会给予警告
 
 ## 常见错误：
 
-1. `error: failed to push some refs to ....`  
+###  1. error: failed to push some refs to ....
+
+#### 原因
 
 问题的出现原因在于：git仓库中已经有一部分代码，所以它不允许你直接把你的代码覆盖上去。  
+
+#### 解决
+
 ① 方法一：强推（`-f`），视情况加`-u`  
     
     git push -f -u origin master
@@ -278,7 +283,38 @@ Github 上传单个文件应该低于100M。上传文件超过50M会给予警告
 最后git push你的代码（视情况加`-u` ）
 
     git push -u origin master
-    
+
+### 2. fatal: The remote end hung up unexpectedly error: RPC failed; curl 56 SSL read: error:00000000:lib(0):func(0):reason(0), errno 10053
+
+#### 表现：
+
+```
+Username for 'https://github.com': Newbie
+Password for 'https://Newbie@github.com':
+Counting objects: 11507, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (8210/8210), done.
+Writing objects: 100% (11506/11506), 21.75 MiB | 0 bytes/s, done.
+Total 11506 (delta 2213), reused 11504 (delta 2211)
+efrror: RPC failed; result=56, HTTP code = 200
+atal: The remote end hung up unexpectedly
+fatal: The remote end hung up unexpectedly
+Everything up-to-date
+```
+
+#### 原因
+
+可能是git缓冲区太小
+
+#### 解决
+
+用`git config var`，将`http.postBuffer`设置为`524288000`来增加Git的HTTP缓冲区。
+```
+git config http.postBuffer 524288000
+```
+#### 参考
+
+[Git push error: RPC failed; result=56, HTTP code = 200 fatal: The remote end hung up unexpectedly fatal](https://stackoverflow.com/questions/24952683/git-push-error-rpc-failed-result-56-http-code-200-fatal-the-remote-end-hun)
 
 ## Thanks
 
