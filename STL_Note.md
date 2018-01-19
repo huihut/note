@@ -311,6 +311,345 @@ Output
 size of myints: 10
 max_size of myints: 10
 ```
+
+#### array::empty
+返回一个布尔值，指示数组容器是否为空，即它的size()是否为0。
+```
+constexpr bool empty() noexcept;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+  std::array<int,0> first;
+  std::array<int,5> second;
+  std::cout << "first " << (first.empty() ? "is empty" : "is not empty") << '\n';
+  std::cout << "second " << (second.empty() ? "is empty" : "is not empty") << '\n';
+  return 0;
+}
+```
+Output:
+```
+first is empty
+second is not empt
+```
+#### array::operator[]
+返回数组中第n个位置的元素的引用。与array::at相似，但array::at会检查数组边界并通过抛出一个out_of_range异常来判断n是否超出范围，而array::operator[]不检查边界。
+```
+      reference operator[] (size_type n);
+const_reference operator[] (size_type n) const;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+    std::array<int,10> myarray;
+    unsigned int i;
+
+    // assign some values:
+    for(i=0; i<10; i++)
+        myarray[i] = i;
+
+    // print content
+    std::cout << "myarray contains:";
+    for(i=0; i<10; i++)
+        std::cout << ' ' << myarray[i];
+    std::cout << '\n';
+
+    return 0;
+}
+```
+Output
+```
+myarray contains: 0 1 2 3 4 5 6 7 8 9
+```
+#### array::at
+返回数组中第n个位置的元素的引用。与array::operator[]相似，但array::at会检查数组边界并通过抛出一个out_of_range异常来判断n是否超出范围，而array::operator[]不检查边界。
+```
+      reference at ( size_type n );
+const_reference at ( size_type n ) const;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+    std::array<int,10> myarray;
+    unsigned int i;
+
+    // assign some values:
+    for(i=0; i<10; i++)
+        myarray[i] = i;
+
+    // print content
+    std::cout << "myarray contains:";
+    for(i=0; i<10; i++)
+        std::cout << ' ' << myarray[i];
+    std::cout << '\n';
+
+    return 0;
+}
+```
+Output
+```
+myarray contains: 0 1 2 3 4 5 6 7 8 9
+```
+#### array::front
+返回对数组容器中第一个元素的引用。array::begin返回的是迭代器，array::front返回的是直接引用。  
+在空容器上调用此函数会导致未定义的行为。
+```
+      reference front();
+const_reference front() const;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+  std::array<int,3> myarray = {2, 16, 77};
+
+  std::cout << "front is: " << myarray.front() << std::endl;   // 2
+  std::cout << "back is: " << myarray.back() << std::endl;     // 77
+
+  myarray.front() = 100;
+
+  std::cout << "myarray now contains:";
+  for ( int& x : myarray ) std::cout << ' ' << x;
+
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+front is: 2
+back is: 77
+myarray now contains: 100 16 77
+```
+#### array::back
+返回对数组容器中最后一个元素的引用。array::end返回的是迭代器，array::back返回的是直接引用。  
+在空容器上调用此函数会导致未定义的行为。
+```
+      reference back();
+const_reference back() const;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+  std::array<int,3> myarray = {5, 19, 77};
+
+  std::cout << "front is: " << myarray.front() << std::endl;   // 5
+  std::cout << "back is: " << myarray.back() << std::endl;     // 77
+
+  myarray.back() = 50;
+
+  std::cout << "myarray now contains:";
+  for ( int& x : myarray ) std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+front is: 5
+back is: 77
+myarray now contains: 5 19 50
+```
+#### array::data
+返回指向数组对象中第一个元素的指针。
+
+由于数组中的元素存储在连续的存储位置，所以检索到的指针可以偏移以访问数组中的任何元素。
+```
+      value_type* data() noexcept;
+const value_type* data() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <cstring>
+#include <array>
+
+int main ()
+{
+  const char* cstr = "Test string";
+  std::array<char,12> charray;
+
+  std::memcpy (charray.data(),cstr,12);
+
+  std::cout << charray.data() << '\n';
+
+  return 0;
+}
+```
+Output
+```
+Test string
+```
+#### array::fill
+用val填充数组所有元素，将val设置为数组对象中所有元素的值。
+```
+void fill (const value_type& val);
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main () {
+  std::array<int,6> myarray;
+
+  myarray.fill(5);
+
+  std::cout << "myarray contains:";
+  for ( int& x : myarray) { std::cout << ' ' << x; }
+
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+myarray contains: 5 5 5 5 5 5
+```
+#### array::swap
+通过x的内容交换数组的内容，这是另一个相同类型的数组对象（包括相同的大小）。
+
+与其他容器的交换成员函数不同，此成员函数通过在各个元素之间执行与其大小相同的单独交换操作，以线性时间运行。
+```
+void swap (array& x) noexcept(noexcept(swap(declval<value_type&>(),declval<value_type&>())));
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+  std::array<int,5> first = {10, 20, 30, 40, 50};
+  std::array<int,5> second = {11, 22, 33, 44, 55};
+
+  first.swap (second);
+
+  std::cout << "first:";
+  for (int& x : first) std::cout << ' ' << x;
+  std::cout << '\n';
+
+  std::cout << "second:";
+  for (int& x : second) std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+first: 11 22 33 44 55
+second: 10 20 30 40 50
+```
+#### get（array）
+形如：std::get<0>(myarray)；传入一个数组容器，返回指定位置元素的引用。
+```
+template <size_t I，class T，size_t N> T＆get（array <T，N>＆arr）noexcept; 
+template <size_t I，class T，size_t N> T && get（array <T，N> && arr）noexcept; 
+template <size_t I，class T，size_t N> const T＆get（const array <T，N>＆arr）noexcept;
+```
+Example
+```
+#include <iostream>
+#include <array>
+#include <tuple>
+
+int main ()
+{
+  std::array<int,3> myarray = {10, 20, 30};
+  std::tuple<int,int,int> mytuple (10, 20, 30);
+
+  std::tuple_element<0,decltype(myarray)>::type myelement;  // int myelement
+
+  myelement = std::get<2>(myarray);
+  std::get<2>(myarray) = std::get<0>(myarray);
+  std::get<0>(myarray) = myelement;
+
+  std::cout << "first element in myarray: " << std::get<0>(myarray) << "\n";
+  std::cout << "first element in mytuple: " << std::get<0>(mytuple) << "\n";
+
+  return 0;
+}
+```
+Output
+```
+first element in myarray: 30
+first element in mytuple: 10
+```
+#### relational operators (array)
+形如：arrayA != arrayB、arrayA > arrayB；依此比较数组每个元素的大小关系。
+```
+（1）	
+template <class T，size_T N> 
+  bool operator ==（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+（2）	
+template <class T，size_T N> 
+  bool operator！=（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+（3）	
+template <class T，size_T N> 
+  bool operator <（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+（4）	
+template <class T，size_T N> 
+  bool operator <=（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+（5）	
+template <class T，size_T N> 
+  bool operator>（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+（6）	
+template <class T，size_T N> 
+  bool operator> =（const array <T，N>＆lhs，const array <T，N>＆rhs）;
+```
+Example
+```
+#include <iostream>
+#include <array>
+
+int main ()
+{
+  std::array<int,5> a = {10, 20, 30, 40, 50};
+  std::array<int,5> b = {10, 20, 30, 40, 50};
+  std::array<int,5> c = {50, 40, 30, 20, 10};
+
+  if (a==b) std::cout << "a and b are equal\n";
+  if (b!=c) std::cout << "b and c are not equal\n";
+  if (b<c) std::cout << "b is less than c\n";
+  if (c>b) std::cout << "c is greater than b\n";
+  if (a<=b) std::cout << "a is less than or equal to b\n";
+  if (a>=b) std::cout << "a is greater than or equal to b\n";
+
+  return 0;
+}
+```
+Output
+```
+a and b are equal
+b and c are not equal
+b is less than c
+c is greater than b
+a is less than or equal to b
+a is greater than or equal to b
+```
 ### vector
 
 ### deque
