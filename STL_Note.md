@@ -36,6 +36,8 @@ template < class T, size_t N > class array;
 
 返回指向数组容器中第一个元素的迭代器。
 
+![](https://i.stack.imgur.com/oa3EQ.png)
+
 ```
       iterator begin() noexcept;
 const_iterator begin() const noexcept;
@@ -66,8 +68,6 @@ myarray contains: 2 16 77 34 50
 #### array::end
 
 返回指向数组容器中最后一个元素之后的理论元素的迭代器。
-
-![](https://i.stack.imgur.com/oa3EQ.png)
 
 ```
       iterator end() noexcept;
@@ -663,6 +663,21 @@ a is less than or equal to b
 a is greater than or equal to b
 ```
 ### vector
+vector是表示可以改变大小的数组的序列容器。
+
+就像数组一样，vector为它们的元素使用连续的存储位置，这意味着它们的元素也可以使用到其元素的常规指针上的偏移来访问，而且和数组一样高效。但是与数组不同的是，它们的大小可以动态地改变，它们的存储由容器自动处理。
+
+在内部，vector使用一个动态分配的数组来存储它们的元素。这个数组可能需要重新分配，以便在插入新元素时增加大小，这意味着分配一个新数组并将所有元素移动到其中。就处理时间而言，这是一个相对昂贵的任务，因此每次将元素添加到容器时矢量都不会重新分配。
+
+相反，vector容器可以分配一些额外的存储以适应可能的增长，并且因此容器可以具有比严格需要包含其元素（即，其大小）的存储更大的实际容量。库可以实现不同的策略的增长到内存使用和重新分配之间的平衡，但在任何情况下，再分配应仅在对数生长的间隔发生尺寸，使得在所述载体的末端各个元件的插入可以与提供分期常量时间复杂性。
+
+因此，与阵列相比，载体消耗更多的内存来交换管理存储和以有效方式动态增长的能力。
+
+与其他动态序列容器（deques，lists和 forward\_lists ）相比，vector非常有效地访问其元素（就像数组一样），并相对有效地从元素末尾添加或移除元素。对于涉及插入或移除除了结尾之外的位置的元素的操作，它们执行比其他位置更差的操作，并且具有比列表和 forward\_lists 更不一致的迭代器和引用。
+
+```
+template < class T, class Alloc = allocator<T> > class vector;
+```
 
 ### deque
 
