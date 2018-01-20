@@ -1,7 +1,5 @@
 # STL
 
-[TOC]
-
 ## 组成
 
 * 容器（containers）
