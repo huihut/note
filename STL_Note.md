@@ -1166,6 +1166,43 @@ vector<_Tp,_Alloc>::operator=(const vector<_Tp, _Alloc>& __x)
 }
 ```
 
+#### vector::push_back
+在vector的最后一个元素之后添加一个新元素。val的内容被复制（或移动）到新的元素。
+
+这有效地将容器size增加了一个，如果新的矢量size超过了当前vector的capacity，则导致所分配的存储空间自动重新分配。
+```
+void push_back (const value_type& val);
+void push_back (value_type&& val);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+  int myint;
+
+  std::cout << "Please enter some integers (enter 0 to end):\n";
+
+  do {
+    std::cin >> myint;
+    myvector.push_back (myint);
+  } while (myint);
+
+  std::cout << "myvector stores " << int(myvector.size()) << " numbers.\n";
+
+  return 0;
+}
+```
+#### vector::pop_back
+删除矢量中的最后一个元素，有效地将容器大小减少一个。
+
+这破坏了被删除的元素。
+```
+void pop_back();
+```
 ### deque
 
 ### forward_list
