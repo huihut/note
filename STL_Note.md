@@ -1,5 +1,7 @@
 # STL
 
+[TOC]
+
 ## 组成
 
 * 容器（containers）
@@ -1197,12 +1199,408 @@ int main ()
 }
 ```
 #### vector::pop_back
-删除矢量中的最后一个元素，有效地将容器大小减少一个。
+删除vector中的最后一个元素，有效地将容器size减少一个。
 
 这破坏了被删除的元素。
 ```
 void pop_back();
 ```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+  int sum (0);
+  myvector.push_back (100);
+  myvector.push_back (200);
+  myvector.push_back (300);
+
+  while (!myvector.empty())
+  {
+    sum+=myvector.back();
+    myvector.pop_back();
+  }
+
+  std::cout << "The elements of myvector add up to " << sum << '\n';
+
+  return 0;
+}
+```
+Output
+```
+The elements of myvector add up to 600
+```
+#### vector::insert
+通过在指定位置的元素之前插入新元素来扩展该vector，通过插入元素的数量有效地增加容器大小。 这会导致分配的存储空间自动重新分配，只有在新的vector的size超过当前的vector的capacity的情况下。 
+
+由于vector使用数组作为其基础存储，因此将元素插入到vector末尾以外的位置会导致容器重新定位位置之后的所有元素到他们的新位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
+```
+single element (1)	
+iterator insert (const_iterator position, const value_type& val);
+fill (2)	
+iterator insert (const_iterator position, size_type n, const value_type& val);
+range (3)	
+template <class InputIterator>
+iterator insert (const_iterator position, InputIterator first, InputIterator last);
+move (4)	
+iterator insert (const_iterator position, value_type&& val);
+initializer list (5)	
+iterator insert (const_iterator position, initializer_list<value_type> il);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector (3,100);
+  std::vector<int>::iterator it;
+
+  it = myvector.begin();
+  it = myvector.insert ( it , 200 );
+
+  myvector.insert (it,2,300);
+
+  // "it" no longer valid, get a new one:
+  it = myvector.begin();
+
+  std::vector<int> anothervector (2,400);
+  myvector.insert (it+2,anothervector.begin(),anothervector.end());
+
+  int myarray [] = { 501,502,503 };
+  myvector.insert (myvector.begin(), myarray, myarray+3);
+
+  std::cout << "myvector contains:";
+  for (it=myvector.begin(); it<myvector.end(); it++)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+myvector contains: 501 502 503 300 300 400 400 200 100 100 100
+```
+
+补充：insert 迭代器野指针错误：
+
+```cpp
+int main()
+{
+	std::vector<int> v(5, 0);
+	std::vector<int>::iterator vi;
+
+  // 获取vector第一个元素的迭代器
+	vi = v.begin();
+
+  // push_back 插入元素之后可能会因为 push_back 的骚操作（创建一个新vector把旧vector的值复制到新vector），导致vector迭代器iterator的指针变成野指针，而导致insert出错
+	v.push_back(10);
+
+	v.insert(vi, 2, 300);
+
+	return 0;
+}
+```
+改正：应该把`vi = v.begin();`放到`v.push_back(10);`后面
+#### vector::erase
+从vector中删除单个元素（position）或一系列元素（[first，last））。
+
+这有效地减少了被去除的元素的数量，从而破坏了容器的大小。
+
+由于vector使用一个数组作为其底层存储，所以删除除vector结束位置之外的元素将导致容器将段被擦除后的所有元素重新定位到新的位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
+```
+iterator erase (const_iterator position);
+iterator erase (const_iterator first, const_iterator last);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+
+  // set some values (from 1 to 10)
+  for (int i=1; i<=10; i++) myvector.push_back(i);
+
+  // erase the 6th element
+  myvector.erase (myvector.begin()+5);
+
+  // erase the first 3 elements:
+  myvector.erase (myvector.begin(),myvector.begin()+3);
+
+  std::cout << "myvector contains:";
+  for (unsigned i=0; i<myvector.size(); ++i)
+    std::cout << ' ' << myvector[i];
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+myvector contains: 4 5 7 8 9 10
+```
+#### vector::swap
+通过x的内容交换容器的内容，x是另一个相同类型的vector对象。尺寸可能不同。
+
+在调用这个成员函数之后，这个容器中的元素是那些在调用之前在x中的元素，而x的元素是在这个元素中的元素。所有迭代器，引用和指针对交换对象保持有效。
+
+请注意，非成员函数存在具有相同名称的交换，并使用与此成员函数相似的优化来重载该算法。
+```
+void swap (vector& x);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> foo (3,100);   // three ints with a value of 100
+  std::vector<int> bar (5,200);   // five ints with a value of 200
+
+  foo.swap(bar);
+
+  std::cout << "foo contains:";
+  for (unsigned i=0; i<foo.size(); i++)
+    std::cout << ' ' << foo[i];
+  std::cout << '\n';
+
+  std::cout << "bar contains:";
+  for (unsigned i=0; i<bar.size(); i++)
+    std::cout << ' ' << bar[i];
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+foo contains: 200 200 200 200 200 
+bar contains: 100 100 100 
+```
+#### vector::clear
+从vector中删除所有的元素（被销毁），留下size为0的容器。
+
+不保证重新分配，并且由于调用此函数， vector的capacity不保证发生变化。强制重新分配的典型替代方法是使用swap：`vector<T>().swap(x);   // clear x reallocating `
+```
+void clear() noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+void printVector(const std::vector<int> &v)
+{
+	for (auto it = v.begin(); it != v.end(); ++it)
+	{
+		std::cout << *it << ' ';
+	}
+	std::cout << std::endl;
+}
+
+int main()
+{
+	std::vector<int> v1(5, 50);
+
+	printVector(v1);
+	std::cout << "v1 size  = " << v1.size() << std::endl;
+	std::cout << "v1 capacity  = " << v1.capacity() << std::endl;
+
+	v1.clear();
+
+	printVector(v1);
+	std::cout << "v1 size  = " << v1.size() << std::endl;
+	std::cout << "v1 capacity  = " << v1.capacity() << std::endl;
+
+	v1.push_back(11);
+	v1.push_back(22);
+
+	printVector(v1);
+	std::cout << "v1 size  = " << v1.size() << std::endl;
+	std::cout << "v1 capacity  = " << v1.capacity() << std::endl;
+
+	return 0;
+}
+```
+Output
+```
+50 50 50 50 50
+v1 size  = 5
+v1 capacity  = 5
+
+v1 size  = 0
+v1 capacity  = 5
+11 22
+v1 size  = 2
+v1 capacity  = 5
+```
+#### vector::emplace
+通过在位置处插入新元素来扩展容器。这个新元素是用args作为构建的参数来构建的。
+
+这有效地增加了一个容器的大小。
+
+分配存储空间的自动重新分配发生在新的vector的size超过当前向量容量的情况下。
+
+由于vector使用数组作为其基础存储，因此将元素插入到vector末尾以外的位置会导致容器将位置之后的所有元素一个到他们的新位置。与其他类型的序列容器（如list或forward_list）相比，这通常是一个低效率的操作。
+
+该元素是通过调用allocator_traits::construct来转换args来创建的。插入一个类似的成员函数，将现有对象复制或移动到容器中。
+
+```
+template <class... Args>
+iterator emplace (const_iterator position, Args&&... args);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector = {10,20,30};
+
+  auto it = myvector.emplace ( myvector.begin()+1, 100 );
+  myvector.emplace ( it, 200 );
+  myvector.emplace ( myvector.end(), 300 );
+
+  std::cout << "myvector contains:";
+  for (auto& x: myvector)
+    std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+myvector contains: 10 200 100 20 30 300
+```
+#### vector::emplace_back
+在vector的末尾插入一个新的元素，紧跟在当前的最后一个元素之后。这个新元素是用args作为构造函数的参数来构造的。
+
+这有效地将容器大小增加了一个，如果新的矢量大小超过了当前的vector容量，则导致所分配的存储空间自动重新分配。
+
+该元素是通过调用allocator_traits :: construct来转换args来创建的。
+
+与push\_back相比，emplace\_back可以避免额外的复制和移动操作。
+```
+template <class... Args>
+  void emplace_back (Args&&... args);
+```
+
+Example
+
+```cpp
+#include <vector>
+#include <string>
+#include <iostream>
+ 
+struct President
+{
+    std::string name;
+    std::string country;
+    int year;
+ 
+    President(std::string p_name, std::string p_country, int p_year)
+        : name(std::move(p_name)), country(std::move(p_country)), year(p_year)
+    {
+        std::cout << "I am being constructed.\n";
+    }
+    President(President&& other)
+        : name(std::move(other.name)), country(std::move(other.country)), year(other.year)
+    {
+        std::cout << "I am being moved.\n";
+    }
+    President& operator=(const President& other) = default;
+};
+ 
+int main()
+{
+    std::vector<President> elections;
+    std::cout << "emplace_back:\n";
+    elections.emplace_back("Nelson Mandela", "South Africa", 1994);
+ 
+    std::vector<President> reElections;
+    std::cout << "\npush_back:\n";
+    reElections.push_back(President("Franklin Delano Roosevelt", "the USA", 1936));
+ 
+    std::cout << "\nContents:\n";
+    for (President const& president: elections) {
+        std::cout << president.name << " was elected president of "
+                  << president.country << " in " << president.year << ".\n";
+    }
+    for (President const& president: reElections) {
+        std::cout << president.name << " was re-elected president of "
+                  << president.country << " in " << president.year << ".\n";
+    }
+}
+```
+
+Output
+
+```
+emplace_back:
+I am being constructed.
+ 
+push_back:
+I am being constructed.
+I am being moved.
+ 
+Contents:
+Nelson Mandela was elected president of South Africa in 1994.
+Franklin Delano Roosevelt was re-elected president of the USA in 1936.
+```
+#### vector::get_allocator
+返回与vector关联的构造器对象的副本。
+```
+allocator_type get_allocator() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+  int * p;
+  unsigned int i;
+
+  // allocate an array with space for 5 elements using vector's allocator:
+  p = myvector.get_allocator().allocate(5);
+
+  // construct values in-place on the array:
+  for (i=0; i<5; i++) myvector.get_allocator().construct(&p[i],i);
+
+  std::cout << "The allocated array contains:";
+  for (i=0; i<5; i++) std::cout << ' ' << p[i];
+  std::cout << '\n';
+
+  // destroy and deallocate:
+  for (i=0; i<5; i++) myvector.get_allocator().destroy(&p[i]);
+  myvector.get_allocator().deallocate(p,5);
+
+  return 0;
+}
+```
+Output
+```
+The allocated array contains: 0 1 2 3 4
+```
+#### relational operators (vector)
+#### swap (vector)
+#### vector <bool>
+
+
+
 ### deque
 
 ### forward_list
