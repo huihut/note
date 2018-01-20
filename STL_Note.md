@@ -1114,7 +1114,9 @@ Size of third: 3
 ```
 
 补充：vector::assign 与 vector::operator= 的区别：
+
 1. vector::assign 实现源码
+
 ```cpp
 void assign(size_type __n, const _Tp& __val) { _M_fill_assign(__n, __val); }
 
@@ -1133,7 +1135,9 @@ void vector<_Tp, _Alloc>::_M_fill_assign(size_t __n, const value_type& __val)
     erase(fill_n(begin(), __n, __val), end());
 }
 ```
+
 2. vector::operator= 实现源码
+
 ```cpp
 template <class _Tp, class _Alloc>
 vector<_Tp,_Alloc>& 
@@ -1161,6 +1165,7 @@ vector<_Tp,_Alloc>::operator=(const vector<_Tp, _Alloc>& __x)
   return *this;
 }
 ```
+
 ### deque
 
 ### forward_list
