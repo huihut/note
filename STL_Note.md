@@ -679,6 +679,488 @@ vector是表示可以改变大小的数组的序列容器。
 template < class T, class Alloc = allocator<T> > class vector;
 ```
 
+#### vector::vector
+（1）empty容器构造函数（默认构造函数）
+构造一个空的容器，没有元素。
+（2）fill构造函数
+用n个元素构造一个容器。每个元素都是val的副本（如果提供）。
+（3）范围（range）构造器
+使用与[ range，first，last]范围内的元素相同的顺序构造一个容器，其中的每个元素都是emplace -从该范围内相应的元素构造而成。
+（4）复制（copy）构造函数（并用分配器复制）
+按照相同的顺序构造一个包含x中每个元素的副本的容器。
+（5）移动（move）构造函数（和分配器移动）
+构造一个获取x元素的容器。
+如果指定了alloc并且与x的分配器不同，那么元素将被移动。否则，没有构建元素（他们的所有权直接转移）。
+x保持未指定但有效的状态。
+（6）初始化列表构造函数
+构造一个容器中的每个元件中的一个拷贝的IL，以相同的顺序。
+
+```
+default (1)	
+explicit vector (const allocator_type& alloc = allocator_type());
+fill (2)	
+explicit vector (size_type n);
+         vector (size_type n, const value_type& val,
+                 const allocator_type& alloc = allocator_type());
+range (3)	
+template <class InputIterator>
+  vector (InputIterator first, InputIterator last,
+          const allocator_type& alloc = allocator_type());
+copy (4)	
+vector (const vector& x);
+vector (const vector& x, const allocator_type& alloc);
+move (5)	
+vector (vector&& x);
+vector (vector&& x, const allocator_type& alloc);
+initializer list (6)	
+vector (initializer_list<value_type> il,
+       const allocator_type& alloc = allocator_type());
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+    // constructors used in the same order as described above:
+    std::vector<int> first;             // empty vector of ints
+    std::vector<int> second(4, 100);    // four ints with value 100
+    std::vector<int> third(second.begin(), second.end());// iterating through second
+    std::vector<int> fourth(third);     // a copy of third
+
+    // the iterator constructor can also be used to construct from arrays:
+    int myints[] = {16,2,77,29};
+    std::vector<int> fifth(myints, myints + sizeof(myints) / sizeof(int));
+
+    std::cout << "The contents of fifth are:";
+    for(std::vector<int>::iterator it = fifth.begin(); it != fifth.end(); ++it)
+        std::cout << ' ' << *it;
+    std::cout << '\n';
+
+    return 0;
+}
+```
+Output
+```
+The contents of fifth are: 16 2 77 29 
+```
+#### vector::~vector
+销毁容器对象。这将在每个包含的元素上调用allocator_traits::destroy，并使用其分配器释放由矢量分配的所有存储容量。
+```
+~vector();
+```
+#### vector::operator=
+将新内容分配给容器，替换其当前内容，并相应地修改其大小。
+```
+copy (1)	
+vector& operator= (const vector& x);
+move (2)	
+vector& operator= (vector&& x);
+initializer list (3)	
+vector& operator= (initializer_list<value_type> il);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> foo (3,0);
+  std::vector<int> bar (5,0);
+
+  bar = foo;
+  foo = std::vector<int>();
+
+  std::cout << "Size of foo: " << int(foo.size()) << '\n';
+  std::cout << "Size of bar: " << int(bar.size()) << '\n';
+  return 0;
+}
+```
+Output
+```
+Size of foo: 0
+Size of bar: 3
+```
+#### vector::begin
+#### vector::end
+#### vector::rbegin
+#### vector::rend
+#### vector::cbegin
+#### vector::cend
+#### vector::rcbegin
+#### vector::rcend
+#### vector::size
+
+返回vector中元素的数量。
+
+这是vector中保存的实际对象的数量，不一定等于其存储容量。
+
+```
+size_type size() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myints;
+  std::cout << "0. size: " << myints.size() << '\n';
+
+  for (int i=0; i<10; i++) myints.push_back(i);
+  std::cout << "1. size: " << myints.size() << '\n';
+
+  myints.insert (myints.end(),10,100);
+  std::cout << "2. size: " << myints.size() << '\n';
+
+  myints.pop_back();
+  std::cout << "3. size: " << myints.size() << '\n';
+
+  return 0;
+}
+```
+Output
+```
+0. size: 0
+1. size: 10
+2. size: 20
+3. size: 19
+```
+#### vector::max_size
+返回该vector可容纳的元素的最大数量。由于已知的系统或库实现限制，
+
+这是容器可以达到的最大潜在大小，但容器无法保证能够达到该大小：在达到该大小之前的任何时间，仍然无法分配存储。
+```
+size_type max_size() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+
+  // set some content in the vector:
+  for (int i=0; i<100; i++) myvector.push_back(i);
+
+  std::cout << "size: " << myvector.size() << "\n";
+  std::cout << "capacity: " << myvector.capacity() << "\n";
+  std::cout << "max_size: " << myvector.max_size() << "\n";
+  return 0;
+}
+```
+A possible output for this program could be:
+```
+size: 100
+capacity: 128
+max_size: 1073741823
+```
+#### vector::resize
+调整容器的大小，使其包含n个元素。
+
+如果n小于当前的容器size，内容将被缩小到前n个元素，将其删除（并销毁它们）。
+
+如果n大于当前容器size，则通过在末尾插入尽可能多的元素以达到大小n来扩展内容。如果指定了val，则新元素将初始化为val的副本，否则将进行值初始化。
+
+如果n也大于当前的容器的capacity（容量），分配的存储空间将自动重新分配。
+
+注意这个函数通过插入或者删除元素的内容来改变容器的实际内容。
+```
+void resize (size_type n);
+void resize (size_type n, const value_type& val);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+
+  // set some initial content:
+  for (int i=1;i<10;i++) myvector.push_back(i);
+
+  myvector.resize(5);
+  myvector.resize(8,100);
+  myvector.resize(12);
+
+  std::cout << "myvector contains:";
+  for (int i=0;i<myvector.size();i++)
+    std::cout << ' ' << myvector[i];
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+myvector contains: 1 2 3 4 5 100 100 100 0 0 0 0
+```
+#### vector::capacity
+返回当前为vector分配的存储空间的大小，用元素表示。这个capacity(容量)不一定等于vector的size。它可以相等或更大，额外的空间允许适应增长，而不需要重新分配每个插入。
+```
+size_type capacity() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+
+  // set some content in the vector:
+  for (int i=0; i<100; i++) myvector.push_back(i);
+
+  std::cout << "size: " << (int) myvector.size() << '\n';
+  std::cout << "capacity: " << (int) myvector.capacity() << '\n';
+  std::cout << "max_size: " << (int) myvector.max_size() << '\n';
+  return 0;
+}
+```
+A possible output for this program could be:
+```
+size: 100
+capacity: 128
+max_size: 1073741823
+```
+#### vector::empty
+返回vector是否为空（即，它的size是否为0）
+```
+bool empty() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector;
+  int sum (0);
+
+  for (int i=1;i<=10;i++) myvector.push_back(i);
+
+  while (!myvector.empty())
+  {
+     sum += myvector.back();
+     myvector.pop_back();
+  }
+
+  std::cout << "total: " << sum << '\n';
+
+  return 0;
+}
+```
+Output
+```
+total: 55
+```
+#### vector::reserve
+请求vector容量至少足以包含n个元素。
+
+如果n大于当前vector容量，则该函数使容器重新分配其存储容量，从而将其容量增加到n（或更大）。
+
+在所有其他情况下，函数调用不会导致重新分配，并且vector容量不受影响。
+
+这个函数对vector大小没有影响，也不能改变它的元素。
+```
+void reserve (size_type n);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int>::size_type sz;
+
+  std::vector<int> foo;
+  sz = foo.capacity();
+  std::cout << "making foo grow:\n";
+  for (int i=0; i<100; ++i) {
+    foo.push_back(i);
+    if (sz!=foo.capacity()) {
+      sz = foo.capacity();
+      std::cout << "capacity changed: " << sz << '\n';
+    }
+  }
+
+  std::vector<int> bar;
+  sz = bar.capacity();
+  bar.reserve(100);   // this is the only difference with foo above
+  std::cout << "making bar grow:\n";
+  for (int i=0; i<100; ++i) {
+    bar.push_back(i);
+    if (sz!=bar.capacity()) {
+      sz = bar.capacity();
+      std::cout << "capacity changed: " << sz << '\n';
+    }
+  }
+  return 0;
+}
+```
+Possible output
+```
+making foo grow:
+capacity changed: 1
+capacity changed: 2
+capacity changed: 4
+capacity changed: 8
+capacity changed: 16
+capacity changed: 32
+capacity changed: 64
+capacity changed: 128
+making bar grow:
+capacity changed: 100
+```
+#### vector::shrink_to_fit
+要求容器减小其capacity(容量)以适应其尺寸。
+
+该请求是非绑定的，并且容器实现可以自由地进行优化，并且保持capacity大于其size的vector。 这可能导致重新分配，但对矢量大小没有影响，并且不能改变其元素。
+```
+void shrink_to_fit();
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> myvector (100);
+  std::cout << "1. capacity of myvector: " << myvector.capacity() << '\n';
+
+  myvector.resize(10);
+  std::cout << "2. capacity of myvector: " << myvector.capacity() << '\n';
+
+  myvector.shrink_to_fit();
+  std::cout << "3. capacity of myvector: " << myvector.capacity() << '\n';
+
+  return 0;
+}
+```
+Possible output
+```
+1. capacity of myvector: 100
+2. capacity of myvector: 100
+3. capacity of myvector: 10
+```
+#### vector::operator[]
+#### vector::at
+#### vector::front
+#### vector::back
+#### vector::data
+
+#### vector::assign
+将新内容分配给vector，替换其当前内容，并相应地修改其大小。
+
+在范围版本（1）中，新内容是从第一个和最后一个范围内的每个元素按相同顺序构造的元素。
+
+在填充版本（2）中，新内容是n个元素，每个元素都被初始化为一个val的副本。
+
+在初始化列表版本（3）中，新内容是以相同顺序作为初始化列表传递的值的副本。
+
+所述内部分配器被用于（通过其性状），以分配和解除分配存储器如果重新分配发生。它也习惯于摧毁所有现有的元素，并构建新的元素。
+```
+range (1)	
+template <class InputIterator>
+  void assign (InputIterator first, InputIterator last);
+fill (2)	
+void assign (size_type n, const value_type& val);
+initializer list (3)	
+void assign (initializer_list<value_type> il);
+```
+Example
+```
+#include <iostream>
+#include <vector>
+
+int main ()
+{
+  std::vector<int> first;
+  std::vector<int> second;
+  std::vector<int> third;
+
+  first.assign (7,100);             // 7 ints with a value of 100
+
+  std::vector<int>::iterator it;
+  it=first.begin()+1;
+
+  second.assign (it,first.end()-1); // the 5 central values of first
+
+  int myints[] = {1776,7,4};
+  third.assign (myints,myints+3);   // assigning from array.
+
+  std::cout << "Size of first: " << int (first.size()) << '\n';
+  std::cout << "Size of second: " << int (second.size()) << '\n';
+  std::cout << "Size of third: " << int (third.size()) << '\n';
+  return 0;
+}
+```
+Output
+```
+Size of first: 7
+Size of second: 5
+Size of third: 3
+```
+
+补充：vector::assign 与 vector::operator= 的区别：
+1. vector::assign 实现源码
+```cpp
+void assign(size_type __n, const _Tp& __val) { _M_fill_assign(__n, __val); }
+
+template <class _Tp, class _Alloc>
+void vector<_Tp, _Alloc>::_M_fill_assign(size_t __n, const value_type& __val) 
+{
+  if (__n > capacity()) {
+    vector<_Tp, _Alloc> __tmp(__n, __val, get_allocator());
+    __tmp.swap(*this);
+  }
+  else if (__n > size()) {
+    fill(begin(), end(), __val);
+    _M_finish = uninitialized_fill_n(_M_finish, __n - size(), __val);
+  }
+  else
+    erase(fill_n(begin(), __n, __val), end());
+}
+```
+2. vector::operator= 实现源码
+```cpp
+template <class _Tp, class _Alloc>
+vector<_Tp,_Alloc>& 
+vector<_Tp,_Alloc>::operator=(const vector<_Tp, _Alloc>& __x)
+{
+  if (&__x != this) {
+    const size_type __xlen = __x.size();
+    if (__xlen > capacity()) {
+      iterator __tmp = _M_allocate_and_copy(__xlen, __x.begin(), __x.end());
+      destroy(_M_start, _M_finish);
+      _M_deallocate(_M_start, _M_end_of_storage - _M_start);
+      _M_start = __tmp;
+      _M_end_of_storage = _M_start + __xlen;
+    }
+    else if (size() >= __xlen) {
+      iterator __i = copy(__x.begin(), __x.end(), begin());
+      destroy(__i, _M_finish);
+    }
+    else {
+      copy(__x.begin(), __x.begin() + size(), _M_start);
+      uninitialized_copy(__x.begin() + size(), __x.end(), _M_finish);
+    }
+    _M_finish = _M_start + __xlen;
+  }
+  return *this;
+}
+```
 ### deque
 
 ### forward_list
