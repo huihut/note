@@ -32,6 +32,8 @@ array是固定大小的顺序容器，它们保存了一个以严格的线性顺
 template < class T, size_t N > class array;
 ```
 
+![](http://img.blog.csdn.net/20160405225541788)
+
 #### array::begin
 
 返回指向数组容器中第一个元素的迭代器。
@@ -675,9 +677,15 @@ vector是表示可以改变大小的数组的序列容器。
 
 与其他动态序列容器（deques，lists和 forward\_lists ）相比，vector非常有效地访问其元素（就像数组一样），并相对有效地从元素末尾添加或移除元素。对于涉及插入或移除除了结尾之外的位置的元素的操作，它们执行比其他位置更差的操作，并且具有比列表和 forward\_lists 更不一致的迭代器和引用。
 
+针对 vector 的各种常见操作的复杂度（效率）如下： 
+* 随机访问 - 常数 O(1) 
+* 在尾部增删元素 - 平摊（amortized）常数 O(1)}} 
+* 增删元素 - 至 vector 尾部的线性距离 O(n)}}
+
 ```
 template < class T, class Alloc = allocator<T> > class vector;
 ```
+![](http://img.blog.csdn.net/20160406151211233)
 
 #### vector::vector
 （1）empty容器构造函数（默认构造函数）
@@ -1234,7 +1242,7 @@ The elements of myvector add up to 600
 #### vector::insert
 通过在指定位置的元素之前插入新元素来扩展该vector，通过插入元素的数量有效地增加容器大小。 这会导致分配的存储空间自动重新分配，只有在新的vector的size超过当前的vector的capacity的情况下。 
 
-由于vector使用数组作为其基础存储，因此将元素插入到vector末尾以外的位置会导致容器重新定位位置之后的所有元素到他们的新位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
+由于vector使用数组作为其基础存储，因此除了将元素插入到vector末尾之后，或vector的begin之前，其他位置会导致容器重新定位位置之后的所有元素到他们的新位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
 ```
 single element (1)	
 iterator insert (const_iterator position, const value_type& val);
@@ -1310,7 +1318,7 @@ int main()
 
 这有效地减少了被去除的元素的数量，从而破坏了容器的大小。
 
-由于vector使用一个数组作为其底层存储，所以删除除vector结束位置之外的元素将导致容器将段被擦除后的所有元素重新定位到新的位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
+由于vector使用一个数组作为其底层存储，所以删除除vector结束位置之后，或vector的begin之前的元素外，将导致容器将段被擦除后的所有元素重新定位到新的位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
 ```
 iterator erase (const_iterator position);
 iterator erase (const_iterator first, const_iterator last);
@@ -1448,7 +1456,7 @@ v1 capacity  = 5
 
 分配存储空间的自动重新分配发生在新的vector的size超过当前向量容量的情况下。
 
-由于vector使用数组作为其基础存储，因此将元素插入到vector末尾以外的位置会导致容器将位置之后的所有元素一个到他们的新位置。与其他类型的序列容器（如list或forward_list）相比，这通常是一个低效率的操作。
+由于vector使用数组作为其基础存储，因此除了将元素插入到vector末尾之后，或vector的begin之前，其他位置会导致容器重新定位位置之后的所有元素到他们的新位置。与其他种类的序列容器（例如list或forward_list）执行相同操作的操作相比，这通常是低效的操作。
 
 该元素是通过调用allocator_traits::construct来转换args来创建的。插入一个类似的成员函数，将现有对象复制或移动到容器中。
 
@@ -1597,11 +1605,285 @@ The allocated array contains: 0 1 2 3 4
 #### swap (vector)
 #### vector <bool>
 
-
-
 ### deque
+deque（['dek]）（双端队列）是double-ended queue 的一个不规则缩写。deque是具有动态大小的序列容器，可以在两端（前端或后端）扩展或收缩。
 
+特定的库可以以不同的方式实现deques，通常作为某种形式的动态数组。但是在任何情况下，它们都允许通过随机访问迭代器直接访问各个元素，通过根据需要扩展和收缩容器来自动处理存储。
+
+因此，它们提供了类似于vector的功能，但是在序列的开始部分也可以高效地插入和删除元素，而不仅仅是在结尾。但是，与vector不同，deques并不保证将其所有元素存储在连续的存储位置：deque通过偏移指向另一个元素的指针访问元素会导致未定义的行为。
+
+两个vector和deques提供了一个非常相似的接口，可以用于类似的目的，但内部工作方式完全不同：虽然vector使用单个数组需要偶尔重新分配以增长，但是deque的元素可以分散在不同的块的容器，容器在内部保存必要的信息以提供对其任何元素的持续时间和统一的顺序接口（通过迭代器）的直接访问。因此，deques在内部比vector更复杂一点，但是这使得他们在某些情况下更有效地增长，尤其是在重新分配变得更加昂贵的很长序列的情况下。
+
+对于频繁插入或删除开始或结束位置以外的元素的操作，deques表现得更差，并且与列表和转发列表相比，迭代器和引用的一致性更低。
+
+deque上常见操作的复杂性（效率）如下： 
+
+* 随机访问 - 常数O(1) 
+* 在结尾或开头插入或移除元素 - 摊销不变O(1) 
+* 插入或移除元素 - 线性O(n)
+```
+template < class T, class Alloc = allocator<T> > class deque;
+```
+![](http://img.blog.csdn.net/20170727225856144?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvRlg2Nzc1ODg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![](https://images0.cnblogs.com/blog/559453/201401/092150340824.png)
+
+#### deque::deque
+
+构造一个deque容器对象，根据所使用的构造函数版本初始化它的内容：
+
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  unsigned int i;
+
+  // constructors used in the same order as described above:
+  std::deque<int> first;                                // empty deque of ints
+  std::deque<int> second (4,100);                       // four ints with value 100
+  std::deque<int> third (second.begin(),second.end());  // iterating through second
+  std::deque<int> fourth (third);                       // a copy of third
+
+  // the iterator constructor can be used to copy arrays:
+  int myints[] = {16,2,77,29};
+  std::deque<int> fifth (myints, myints + sizeof(myints) / sizeof(int) );
+
+  std::cout << "The contents of fifth are:";
+  for (std::deque<int>::iterator it = fifth.begin(); it!=fifth.end(); ++it)
+    std::cout << ' ' << *it;
+
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+The contents of fifth are: 16 2 77 29 
+```
+#### deque::push_back
+在当前的最后一个元素之后 ，在deque容器的末尾添加一个新元素。val的内容被复制（或移动）到新的元素。
+
+这有效地增加了一个容器的大小。
+```
+void push_back (const value_type& val);
+void push_back (value_type&& val);
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque;
+  int myint;
+
+  std::cout << "Please enter some integers (enter 0 to end):\n";
+
+  do {
+    std::cin >> myint;
+    mydeque.push_back (myint);
+  } while (myint);
+
+  std::cout << "mydeque stores " << (int) mydeque.size() << " numbers.\n";
+
+  return 0;
+}
+```
+#### deque::push_front
+在deque容器的开始位置插入一个新的元素，位于当前的第一个元素之前。val的内容被复制（或移动）到插入的元素。
+
+这有效地增加了一个容器的大小。
+```
+void push_front (const value_type& val);
+void push_front (value_type&& val);
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque (2,100);     // two ints with a value of 100
+  mydeque.push_front (200);
+  mydeque.push_front (300);
+
+  std::cout << "mydeque contains:";
+  for (std::deque<int>::iterator it = mydeque.begin(); it != mydeque.end(); ++it)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+300 200 100 100
+```
+#### deque::pop_back
+删除deque容器中的最后一个元素，有效地将容器大小减少一个。
+
+这破坏了被删除的元素。
+
+```
+void pop_back();
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque;
+  int sum (0);
+  mydeque.push_back (10);
+  mydeque.push_back (20);
+  mydeque.push_back (30);
+
+  while (!mydeque.empty())
+  {
+    sum+=mydeque.back();
+    mydeque.pop_back();
+  }
+
+  std::cout << "The elements of mydeque add up to " << sum << '\n';
+
+  return 0;
+}
+```
+Output
+```
+The elements of mydeque add up to 60
+```
+#### deque::pop_front
+删除deque容器中的第一个元素，有效地减小其大小。
+
+这破坏了被删除的元素。
+```
+void pop_front();
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque;
+
+  mydeque.push_back (100);
+  mydeque.push_back (200);
+  mydeque.push_back (300);
+
+  std::cout << "Popping out the elements in mydeque:";
+  while (!mydeque.empty())
+  {
+    std::cout << ' ' << mydeque.front();
+    mydeque.pop_front();
+  }
+
+  std::cout << "\nThe final size of mydeque is " << int(mydeque.size()) << '\n';
+
+  return 0;
+}
+```
+Output
+```
+Popping out the elements in mydeque: 100 200 300
+The final size of mydeque is 0
+```
+#### deque::emplace_front
+在deque的开头插入一个新的元素，就在其当前的第一个元素之前。这个新的元素是用args作为构建的参数来构建的。
+
+这有效地增加了一个容器的大小。
+
+该元素是通过调用allocator_traits::construct来转换args来创建的。
+
+存在一个类似的成员函数push_front，它可以将现有对象复制或移动到容器中。
+```
+template <class... Args>
+  void emplace_front (Args&&... args);
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque = {10,20,30};
+
+  mydeque.emplace_front (111);
+  mydeque.emplace_front (222);
+
+  std::cout << "mydeque contains:";
+  for (auto& x: mydeque)
+    std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+mydeque contains: 222 111 10 20 30
+```
+#### deque::emplace_back
+在deque的末尾插入一个新的元素，紧跟在当前的最后一个元素之后。这个新的元素是用args作为构建的参数来构建的。
+
+这有效地增加了一个容器的大小。
+
+该元素是通过调用allocator_traits::construct来转换args来创建的。
+
+存在一个类似的成员函数push_back，它可以将现有对象复制或移动到容器中
+```
+template <class... Args>
+  void emplace_back (Args&&... args);
+```
+Example
+```
+#include <iostream>
+#include <deque>
+
+int main ()
+{
+  std::deque<int> mydeque = {10,20,30};
+
+  mydeque.emplace_back (100);
+  mydeque.emplace_back (200);
+
+  std::cout << "mydeque contains:";
+  for (auto& x: mydeque)
+    std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+mydeque contains: 10 20 30 100 200
+```
 ### forward_list
+
+forward_list（单向链表）是序列容器，允许在序列中的任何地方进行恒定的时间插入和擦除操作。
+
+forward\_list（单向链表）被实现为单链表; 单链表可以将它们包含的每个元素存储在不同和不相关的存储位置中。通过关联到序列中下一个元素的链接的每个元素来保留排序。forward\_list容器和列表
+
+之间的主要设计区别容器是第一个内部只保留一个到下一个元素的链接，而后者每个元素保留两个链接：一个指向下一个元素，一个指向前一个元素，允许在两个方向上有效的迭代，但是每个元素消耗额外的存储空间并且插入和移除元件的时间开销略高。因此，forward_list对象比列表对象更有效率，尽管它们只能向前迭代。
+
+与其他基本的标准序列容器（array，vector和deque），forward_list通常在插入，提取和移动容器内任何位置的元素方面效果更好，因此也适用于密集使用这些元素的算法，如排序算法。
+
+的主要缺点修饰符Modifiers S和列表相比这些其它序列容器s是说，他们缺乏可以通过位置的元素的直接访问; 例如，要访问forward_list中的第六个元素，必须从开始位置迭代到该位置，这需要在这些位置之间的线性时间。它们还消耗一些额外的内存来保持与每个元素相关联的链接信息（这可能是大型小元素列表的重要因素）。
+
+该修饰符Modifiersclass模板的设计考虑到效率：按照设计，它与简单的手写C型单链表一样高效，实际上是唯一的标准容器，为了效率的考虑故意缺少尺寸成员函数：由于其性质作为一个链表，具有一个需要一定时间的大小的成员将需要它保持一个内部计数器的大小（如列表所示）。这会消耗一些额外的存储空间，并使插入和删除操作效率稍低。要获取forward_list对象的大小，可以使用距离算法的开始和结束，这是一个需要线性时间的操作。
+
+![](http://img.blog.csdn.net/20160407212133266)
 
 ### list
 
