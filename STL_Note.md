@@ -1,5 +1,11 @@
 # STL
 
+## 网站
+
+* [cplusplus . stl](http://www.cplusplus.com/reference/stl/)
+* [cppreference . C++ 参考手册](http://zh.cppreference.com/w/%E9%A6%96%E9%A1%B5)
+* [CSDN专栏：STL学习笔记](http://blog.csdn.net/column/details/geek-stl.html)
+
 ## 组成
 
 * 容器（containers）
@@ -1869,7 +1875,7 @@ Output
 ```
 mydeque contains: 10 20 30 100 200
 ```
-### forward_list
+### forward\_list
 
 forward_list（单向链表）是序列容器，允许在序列中的任何地方进行恒定的时间插入和擦除操作。
 
@@ -1885,6 +1891,131 @@ forward\_list（单向链表）被实现为单链表; 单链表可以将它们�
 
 ![](http://img.blog.csdn.net/20160407212133266)
 
+#### forward\_list::forward\_list
+
+```
+default (1)	
+explicit forward_list (const allocator_type& alloc = allocator_type());
+fill (2)	
+explicit forward_list (size_type n);
+explicit forward_list (size_type n, const value_type& val,
+                        const allocator_type& alloc = allocator_type());
+range (3)	
+template <class InputIterator>
+  forward_list (InputIterator first, InputIterator last,
+                const allocator_type& alloc = allocator_type());
+copy (4)	
+forward_list (const forward_list& fwdlst);
+forward_list (const forward_list& fwdlst, const allocator_type& alloc);
+move (5)	
+forward_list (forward_list&& fwdlst);
+forward_list (forward_list&& fwdlst, const allocator_type& alloc);
+initializer list (6)	
+forward_list (initializer_list<value_type> il,
+              const allocator_type& alloc = allocator_type());
+```
+Example
+```
+#include <iostream>
+#include <forward_list>
+
+int main ()
+{
+  // constructors used in the same order as described above:
+
+  std::forward_list<int> first;                      // default: empty
+  std::forward_list<int> second (3,77);              // fill: 3 seventy-sevens
+  std::forward_list<int> third (second.begin(), second.end()); // range initialization
+  std::forward_list<int> fourth (third);            // copy constructor
+  std::forward_list<int> fifth (std::move(fourth));  // move ctor. (fourth wasted)
+  std::forward_list<int> sixth = {3, 52, 25, 90};    // initializer_list constructor
+
+  std::cout << "first:" ; for (int& x: first)  std::cout << " " << x; std::cout << '\n';
+  std::cout << "second:"; for (int& x: second) std::cout << " " << x; std::cout << '\n';
+  std::cout << "third:";  for (int& x: third)  std::cout << " " << x; std::cout << '\n';
+  std::cout << "fourth:"; for (int& x: fourth) std::cout << " " << x; std::cout << '\n';
+  std::cout << "fifth:";  for (int& x: fifth)  std::cout << " " << x; std::cout << '\n';
+  std::cout << "sixth:";  for (int& x: sixth)  std::cout << " " << x; std::cout << '\n';
+
+  return 0;
+}
+```
+Possible output
+```
+forward_list constructor examples:
+first:
+second: 77 77 77
+third: 77 77 77
+fourth:
+fifth: 77 77 77
+sixth: 3 52 25 90
+```
+
+#### forward\_list::~forward\_list
+
+#### forward\_list::before\_begin
+返回指向容器中第一个元素之前的位置的迭代器。
+
+返回的迭代器不应被解除引用：它是为了用作成员函数的参数emplace\_after，insert\_after，erase\_after或splice\_after，指定序列，其中执行该动作的位置的开始位置。
+
+```
+      iterator before_begin() noexcept;
+const_iterator before_begin() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <forward_list>
+
+int main ()
+{
+  std::forward_list<int> mylist = {20, 30, 40, 50};
+
+  mylist.insert_after ( mylist.before_begin(), 11 );
+
+  std::cout << "mylist contains:";
+  for ( int& x: mylist ) std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+mylist contains: 11 20 30 40 50
+```
+#### forward\_list::cbefore\_begin
+返回指向容器中第一个元素之前的位置的const_iterator。
+
+一个常量性是指向常量内容的迭代器。这个迭代器可以增加和减少（除非它本身也是const），就像forward\_list::before\_begin返回的迭代器一样，但不能用来修改它指向的内容。
+
+返回的价值不得解除引用。
+```
+const_iterator cbefore_begin() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <forward_list>
+
+int main ()
+{
+  std::forward_list<int> mylist = {77, 2, 16};
+
+  mylist.insert_after ( mylist.cbefore_begin(), 19 );
+
+  std::cout << "mylist contains:";
+  for ( int& x: mylist ) std::cout << ' ' << x;
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+mylist contains: 19 77 2 16
+```
+
 ### list
 
 ### stack
@@ -1899,7 +2030,472 @@ forward\_list（单向链表）被实现为单链表; 单链表可以将它们�
 
 ### map
 
+map 是关联容器，按照特定顺序存储由 key value (键值) 和 mapped value (映射值) 组合形成的元素。
+
+在映射中，键值通常用于对元素进行排序和唯一标识，而映射的值存储与此键关联的内容。该类型的键和映射的值可能不同，并且在部件类型被分组在一起VALUE_TYPE，这是一种对类型结合两种：
+ 
+`typedef pair<const Key, T> value_type;`
+
+在内部，映射中的元素总是按照由其内部比较对象（比较类型）指示的特定的严格弱排序标准按键排序。映射容器通常比unordered_map容器慢，以通过它们的键来访问各个元素，但是它们允许基于它们的顺序对子集进行直接迭代。 在该映射值地图可以直接通过使用其相应的键来访问括号运算符（（操作符[] ）。 映射通常如实施
+
+```
+template < class Key,                                     // map::key_type
+           class T,                                       // map::mapped_type
+           class Compare = less<Key>,                     // map::key_compare
+           class Alloc = allocator<pair<const Key,T> >    // map::allocator_type
+           > class map;
+```
+
+#### map::map
+构造一个映射容器对象，根据所使用的构造器版本初始化其内容：
+
+（1）空容器构造函数（默认构造函数）
+
+构造一个空的容器，没有元素。
+
+（2）范围构造函数
+
+构造具有一样多的元素的范围内的容器[第一，最后一个），其中每个元件布设构造的从在该范围内它的相应的元件。
+
+（3）复制构造函数（并用分配器复制）
+
+使用x中的每个元素的副本构造一个容器。
+
+（4）移动构造函数（并与分配器一起移动）
+
+构造一个获取x元素的容器。
+如果指定了alloc并且与x的分配器不同，那么元素将被移动。否则，没有构建元素（他们的所有权直接转移）。
+x保持未指定但有效的状态。
+
+（5）初始化列表构造函数
+
+用il中的每个元素的副本构造一个容器。
+
+```
+empty (1)	
+explicit map (const key_compare& comp = key_compare(),
+              const allocator_type& alloc = allocator_type());
+explicit map (const allocator_type& alloc);
+range (2)	
+template <class InputIterator>
+  map (InputIterator first, InputIterator last,
+       const key_compare& comp = key_compare(),
+       const allocator_type& = allocator_type());
+copy (3)	
+map (const map& x);
+map (const map& x, const allocator_type& alloc);
+move (4)	
+map (map&& x);
+map (map&& x, const allocator_type& alloc);
+initializer list (5)	
+map (initializer_list<value_type> il,
+     const key_compare& comp = key_compare(),
+     const allocator_type& alloc = allocator_type());
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+bool fncomp (char lhs, char rhs) {return lhs<rhs;}
+
+struct classcomp {
+  bool operator() (const char& lhs, const char& rhs) const
+  {return lhs<rhs;}
+};
+
+int main ()
+{
+  std::map<char,int> first;
+
+  first['a']=10;
+  first['b']=30;
+  first['c']=50;
+  first['d']=70;
+
+  std::map<char,int> second (first.begin(),first.end());
+
+  std::map<char,int> third (second);
+
+  std::map<char,int,classcomp> fourth;                 // class as Compare
+
+  bool(*fn_pt)(char,char) = fncomp;
+  std::map<char,int,bool(*)(char,char)> fifth (fn_pt); // function pointer as Compare
+
+  return 0;
+}
+```
+#### map::begin
+返回引用map容器中第一个元素的迭代器。
+
+由于map容器始终保持其元素的顺序，所以开始指向遵循容器排序标准的元素。
+
+如果容器是空的，则返回的迭代器值不应被解除引用。
+```
+      iterator begin() noexcept;
+const_iterator begin() const noexcept;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+
+  mymap['b'] = 100;
+  mymap['a'] = 200;
+  mymap['c'] = 300;
+
+  // show content:
+  for (std::map<char,int>::iterator it=mymap.begin(); it!=mymap.end(); ++it)
+    std::cout << it->first << " => " << it->second << '\n';
+
+  return 0;
+}
+```
+Output
+```
+a => 200
+b => 100
+c => 300
+```
+
+#### map::key_comp
+返回容器用于比较键的比较对象的副本。 
+
+```
+key_compare key_comp() const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+
+  std::map<char,int>::key_compare mycomp = mymap.key_comp();
+
+  mymap['a']=100;
+  mymap['b']=200;
+  mymap['c']=300;
+
+  std::cout << "mymap contains:\n";
+
+  char highest = mymap.rbegin()->first;     // key value of last element
+
+  std::map<char,int>::iterator it = mymap.begin();
+  do {
+    std::cout << it->first << " => " << it->second << '\n';
+  } while ( mycomp((*it++).first, highest) );
+
+  std::cout << '\n';
+
+  return 0;
+}
+```
+Output
+```
+mymap contains:
+a => 100
+b => 200
+c => 300
+```
+#### map::value_comp
+返回可用于比较两个元素的比较对象，以获取第一个元素的键是否在第二个元素之前。
+
+```
+value_compare value_comp() const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+
+  mymap['x']=1001;
+  mymap['y']=2002;
+  mymap['z']=3003;
+
+  std::cout << "mymap contains:\n";
+
+  std::pair<char,int> highest = *mymap.rbegin();          // last element
+
+  std::map<char,int>::iterator it = mymap.begin();
+  do {
+    std::cout << it->first << " => " << it->second << '\n';
+  } while ( mymap.value_comp()(*it++, highest) );
+
+  return 0;
+}
+```
+Output
+```
+mymap contains:
+x => 1001
+y => 2002
+z => 3003
+```
+#### map::find
+在容器中搜索具有等于k的键的元素，如果找到则返回一个迭代器，否则返回map::end的迭代器。
+
+如果容器的比较对象自反地返回假（即，不管元素作为参数传递的顺序），则两个key被认为是等同的。 
+
+另一个成员函数map::count可以用来检查一个特定的键是否存在。
+```
+      iterator find (const key_type& k);
+const_iterator find (const key_type& k) const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+  std::map<char,int>::iterator it;
+
+  mymap['a']=50;
+  mymap['b']=100;
+  mymap['c']=150;
+  mymap['d']=200;
+
+  it = mymap.find('b');
+  if (it != mymap.end())
+    mymap.erase (it);
+
+  // print content:
+  std::cout << "elements in mymap:" << '\n';
+  std::cout << "a => " << mymap.find('a')->second << '\n';
+  std::cout << "c => " << mymap.find('c')->second << '\n';
+  std::cout << "d => " << mymap.find('d')->second << '\n';
+
+  return 0;
+}
+```
+Output
+```
+elements in mymap:
+a => 50
+c => 150
+d => 200
+```
+#### map::count
+在容器中搜索具有等于k的键的元素，并返回匹配的数量。
+
+由于地图容器中的所有元素都是唯一的，因此该函数只能返回1（如果找到该元素）或返回零（否则）。
+
+如果容器的比较对象自反地返回错误（即，不管按键作为参数传递的顺序），则两个键被认为是等同的。
+```
+size_type count (const key_type& k) const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+  char c;
+
+  mymap ['a']=101;
+  mymap ['c']=202;
+  mymap ['f']=303;
+
+  for (c='a'; c<'h'; c++)
+  {
+    std::cout << c;
+    if (mymap.count(c)>0)
+      std::cout << " is an element of mymap.\n";
+    else 
+      std::cout << " is not an element of mymap.\n";
+  }
+
+  return 0;
+}
+```
+Output
+```
+a is an element of mymap.
+b is not an element of mymap.
+c is an element of mymap.
+d is not an element of mymap.
+e is not an element of mymap.
+f is an element of mymap.
+g is not an element of mymap.
+```
+
+#### map::lower_bound
+将迭代器返回到下限
+
+返回指向容器中第一个元素的迭代器，该元素的键不会在k之前出现（即，它是等价的或者在其后）。
+
+该函数使用其内部比较对象（key\_comp）来确定这一点，将迭代器返回到key\_comp（element\_key，k）将返回false的第一个元素。
+
+如果map类用默认的比较类型（less）实例化，则函数返回一个迭代器到第一个元素，其键不小于k。
+
+一个类似的成员函数upper\_bound具有相同的行为lower\_bound，除非映射包含一个key值等于k的元素：在这种情况下，lower\_bound返回指向该元素的迭代器，而upper\_bound返回指向下一个元素的迭代器。
+```
+      iterator lower_bound (const key_type& k);
+const_iterator lower_bound (const key_type& k) const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+  std::map<char,int>::iterator itlow,itup;
+
+  mymap['a']=20;
+  mymap['b']=40;
+  mymap['c']=60;
+  mymap['d']=80;
+  mymap['e']=100;
+
+  itlow=mymap.lower_bound ('b');  // itlow points to b
+  itup=mymap.upper_bound ('d');   // itup points to e (not d!)
+
+  mymap.erase(itlow,itup);        // erases [itlow,itup)
+
+  // print content:
+  for (std::map<char,int>::iterator it=mymap.begin(); it!=mymap.end(); ++it)
+    std::cout << it->first << " => " << it->second << '\n';
+
+  return 0;
+}
+```
+Output
+```
+a => 20
+e => 100
+```
+#### map::upper_bound
+
+将迭代器返回到上限
+
+返回一个指向容器中第一个元素的迭代器，它的关键字被认为是在k之后。
+
+该函数使用其内部比较对象（key\_comp）来确定这一点，将迭代器返回到key\_comp（k，element\_key）将返回true的第一个元素。
+
+如果map类用默认的比较类型（less）实例化，则函数返回一个迭代器到第一个元素，其键大于k。
+
+类似的成员函数lower\_bound具有与upper\_bound相同的行为，除了map包含一个元素，其键值等于k：在这种情况下，lower\_bound返回指向该元素的迭代器，而upper\_bound返回指向下一个元素的迭代器。
+
+```
+      iterator upper_bound (const key_type& k);
+const_iterator upper_bound (const key_type& k) const;
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+  std::map<char,int>::iterator itlow,itup;
+
+  mymap['a']=20;
+  mymap['b']=40;
+  mymap['c']=60;
+  mymap['d']=80;
+  mymap['e']=100;
+
+  itlow=mymap.lower_bound ('b');  // itlow points to b
+  itup=mymap.upper_bound ('d');   // itup points to e (not d!)
+
+  mymap.erase(itlow,itup);        // erases [itlow,itup)
+
+  // print content:
+  for (std::map<char,int>::iterator it=mymap.begin(); it!=mymap.end(); ++it)
+    std::cout << it->first << " => " << it->second << '\n';
+
+  return 0;
+}
+```
+Output
+```
+a => 20
+e => 100
+```
+
+#### map::upper_bound
+
+获取相同元素的范围
+
+返回包含容器中所有具有与k等价的键的元素的范围边界。 由于地图容器中的元素具有唯一键，所以返回的范围最多只包含一个元素。 
+
+如果没有找到匹配，则返回的范围具有零的长度，与两个迭代器指向具有考虑去后一个密钥对所述第一元件ķ根据容器的内部比较对象（key\_comp）。如果容器的比较对象返回false，则两个键被认为是等价的。
+
+
+```
+pair<const_iterator,const_iterator> equal_range (const key_type& k) const;
+pair<iterator,iterator>             equal_range (const key_type& k);
+```
+Example
+```
+#include <iostream>
+#include <map>
+
+int main ()
+{
+  std::map<char,int> mymap;
+
+  mymap['a']=10;
+  mymap['b']=20;
+  mymap['c']=30;
+
+  std::pair<std::map<char,int>::iterator,std::map<char,int>::iterator> ret;
+  ret = mymap.equal_range('b');
+
+  std::cout << "lower bound points to: ";
+  std::cout << ret.first->first << " => " << ret.first->second << '\n';
+
+  std::cout << "upper bound points to: ";
+  std::cout << ret.second->first << " => " << ret.second->second << '\n';
+
+  return 0;
+}
+```
+Output
+```
+lower bound points to: 'b' => 20
+upper bound points to: 'c' => 30
+```
+
 ### multimap
+
+### 无序容器（Unordered Container）：unordered\_set、unordered\_multiset、unordered\_map、unordered\_multimap
+
+包括：
+
+* unordered\_set
+* unordered\_multiset
+* unordered\_map
+* unordered\_multimap
+
+都是以哈希表实现的。
+
+![](http://img.blog.csdn.net/20160410123436394)
+
+unordered\_set、unodered\_multiset结构：
+
+![](http://img.blog.csdn.net/20160410123518692)
+
+unordered\_map、unodered\_multimap结构：
+
+![](http://img.blog.csdn.net/20160410123525739)
 
 ### unordered_set 
 
@@ -1909,5 +2505,224 @@ forward\_list（单向链表）被实现为单链表; 单链表可以将它们�
 
 ### unordered_multimap 
 
+### tuple
 
+元组是一个能够容纳元素集合的对象。每个元素可以是不同的类型。
 
+```
+template <class... Types> class tuple;
+```
+
+Example
+```
+#include <iostream>     // std::cout
+#include <tuple>        // std::tuple, std::get, std::tie, std::ignore
+
+int main ()
+{
+  std::tuple<int,char> foo (10,'x');
+  auto bar = std::make_tuple ("test", 3.1, 14, 'y');
+
+  std::get<2>(bar) = 100;                                    // access element
+
+  int myint; char mychar;
+
+  std::tie (myint, mychar) = foo;                            // unpack elements
+  std::tie (std::ignore, std::ignore, myint, mychar) = bar;  // unpack (with ignore)
+
+  mychar = std::get<3>(bar);
+
+  std::get<0>(foo) = std::get<2>(bar);
+  std::get<1>(foo) = mychar;
+
+  std::cout << "foo contains: ";
+  std::cout << std::get<0>(foo) << ' ';
+  std::cout << std::get<1>(foo) << '\n';
+
+  return 0;
+}
+```
+Output
+```
+foo contains: 100 y
+```
+#### tuple::tuple
+构建一个 tuple（元组）对象。
+
+这涉及单独构建其元素，初始化取决于调用的构造函数形式：
+
+（1）默认的构造函数
+
+构建一个 元组对象的元素值初始化。
+
+（2）复制/移动构造函数
+
+该对象使用tpl的内容进行初始化 元组目的。tpl
+的相应元素被传递给每个元素的构造函数。
+
+（3）隐式转换构造函数
+
+同上。tpl中的
+所有类型都可以隐含地转换为构造中它们各自元素的类型元组 目的。
+
+（4）初始化构造函数
+用elems中的相应元素初始化每个元素。elems
+的相应元素被传递给每个元素的构造函数。
+
+（5）对转换构造函数
+
+该对象有两个对应于pr.first和的元素pr.second。PR中的所有类型都应该隐含地转换为其中各自元素的类型元组 目的。
+
+（6）分配器版本
+
+和上面的版本一样，除了每个元素都是使用allocator alloc构造的。
+
+```
+default (1)	
+constexpr tuple();
+copy / move (2)	
+tuple (const tuple& tpl) = default;
+tuple (tuple&& tpl) = default;
+implicit conversion (3)	
+template <class... UTypes>
+  tuple (const tuple<UTypes...>& tpl);
+template <class... UTypes>
+  tuple (tuple<UTypes...>&& tpl);
+initialization (4)	
+explicit tuple (const Types&... elems);
+template <class... UTypes>
+  explicit tuple (UTypes&&... elems);
+conversion from pair (5)	
+template <class U1, class U2>
+  tuple (const pair<U1,U2>& pr);
+template <class U1, class U2>
+  tuple (pair<U1,U2>&& pr);
+allocator (6)	
+template<class Alloc>
+  tuple (allocator_arg_t aa, const Alloc& alloc);
+template<class Alloc>
+  tuple (allocator_arg_t aa, const Alloc& alloc, const tuple& tpl);
+template<class Alloc>
+  tuple (allocator_arg_t aa, const Alloc& alloc, tuple&& tpl);
+template<class Alloc,class... UTypes>
+  tuple (allocator_arg_t aa, const Alloc& alloc, const tuple<UTypes...>& tpl);
+template<class Alloc, class... UTypes>
+  tuple (allocator_arg_t aa, const Alloc& alloc, tuple<UTypes...>&& tpl);
+template<class Alloc>
+  tuple (allocator_arg_t aa, const Alloc& alloc, const Types&... elems);
+template<class Alloc, class... UTypes>
+  tuple (allocator_arg_t aa, const Alloc& alloc, UTypes&&... elems);
+template<class Alloc, class U1, class U2>
+  tuple (allocator_arg_t aa, const Alloc& alloc, const pair<U1,U2>& pr);
+template<class Alloc, class U1, class U2>
+  tuple (allocator_arg_t aa, const Alloc& alloc, pair<U1,U2>&& pr);
+```
+Example
+```
+#include <iostream>     // std::cout
+#include <utility>      // std::make_pair
+#include <tuple>        // std::tuple, std::make_tuple, std::get
+
+int main ()
+{
+  std::tuple<int,char> first;                             // default
+  std::tuple<int,char> second (first);                    // copy
+  std::tuple<int,char> third (std::make_tuple(20,'b'));   // move
+  std::tuple<long,char> fourth (third);                   // implicit conversion
+  std::tuple<int,char> fifth (10,'a');                    // initialization
+  std::tuple<int,char> sixth (std::make_pair(30,'c'));    // from pair / move
+
+  std::cout << "sixth contains: " << std::get<0>(sixth);
+  std::cout << " and " << std::get<1>(sixth) << '\n';
+
+  return 0;
+}
+```
+Output
+```
+sixth contains: 30 and c
+```
+
+### pair
+这个类把一对值（values）结合在一起，这些值可能是不同的类型（T1 和 T2）。每个值可以被公有的成员变量first、second访问。
+
+pair是tuple（元组）的一个特例。
+
+pair的实现是一个结构体，主要的两个成员变量是first second 因为是使用struct不是class，所以可以直接使用pair的成员变量。
+
+应用：
+
+* 可以将两个类型数据组合成一个如map<key, value>
+* 当某个函数需要两个返回值时
+
+```
+template <class T1, class T2> struct pair;
+```
+#### pair::pair
+构建一个pair对象。
+
+这涉及到单独构建它的两个组件对象，初始化依赖于调用的构造器形式：
+
+（1）默认的构造函数
+
+构建一个 对对象的元素值初始化。
+
+（2）复制/移动构造函数（和隐式转换）
+
+该对象被初始化为pr的内容 对目的。pr
+的相应成员被传递给每个成员的构造函数。
+
+（3）初始化构造函数
+
+会员 第一是由一个和成员构建的第二与b。
+
+（4）分段构造
+
+构造成员 first  和 second  到位，传递元素first\_args 作为参数的构造函数 first，和元素 second\_args 到的构造函数 second 。
+
+```
+default (1)	
+constexpr pair();
+copy / move (2)	
+template<class U, class V> pair (const pair<U,V>& pr);
+template<class U, class V> pair (pair<U,V>&& pr);
+pair (const pair& pr) = default;
+pair (pair&& pr) = default;
+initialization (3)	
+pair (const first_type& a, const second_type& b);
+template<class U, class V> pair (U&& a, V&& b);
+piecewise (4)	
+template <class... Args1, class... Args2>
+  pair (piecewise_construct_t pwc, tuple<Args1...> first_args,
+                                   tuple<Args2...> second_args);
+```
+
+Example
+
+```
+#include <utility>      // std::pair, std::make_pair
+#include <string>       // std::string
+#include <iostream>     // std::cout
+
+int main () {
+  std::pair <std::string,double> product1;                     // default constructor
+  std::pair <std::string,double> product2 ("tomatoes",2.30);   // value init
+  std::pair <std::string,double> product3 (product2);          // copy constructor
+
+  product1 = std::make_pair(std::string("lightbulbs"),0.99);   // using make_pair (move)
+
+  product2.first = "shoes";                  // the type of first is string
+  product2.second = 39.90;                   // the type of second is double
+
+  std::cout << "The price of " << product1.first << " is $" << product1.second << '\n';
+  std::cout << "The price of " << product2.first << " is $" << product2.second << '\n';
+  std::cout << "The price of " << product3.first << " is $" << product3.second << '\n';
+  return 0;
+}
+```
+Output
+```
+The price of lightbulbs is $0.99
+The price of shoes is $39.9
+The price of tomatoes is $2.3
+```
