@@ -162,6 +162,10 @@
 
 	git branch -d huihut
 
+### 克隆指定分支
+
+        git clone -b huihut git@github.com:huihut/huihut.github.io.git
+
 
 ## 查询
 
