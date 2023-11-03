@@ -199,7 +199,33 @@
 * 清空缓存
 
 		git rm -r --cached . 
-     
+
+## 重置（删除提交记录）
+
+* 从`master`创建并切换到新的分支`new_branch`
+
+	git checkout --orphan new_branch
+
+* 添加此目录下全部文件
+
+	git add .
+
+* 提交
+
+	git commit -m 'init'
+
+* 删除原来的`master`分支
+
+	git branch -D master
+
+* 把新分支`new_branch`重命名成`master`
+
+	git branch -m  master
+
+* 提交到远程分支
+
+	git push -f origin master
+
 
 ## 大文件存储
 
